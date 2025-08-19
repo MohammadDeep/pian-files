@@ -1,0 +1,21 @@
+# venv file 
+venv_pain/
+
+
+
+# بیخیال پوشه محیط مجازی
+.venv/
+
+# بیخیال فایل‌های موقت پایتون
+__pycache__/
+*.pyc
+
+# بیخیال لاگ‌ها
+*.log
+
+# بیخیال فایل‌های کانفیگ محلی
+config.local.json
+
+
+# teest fiel
+test*/
