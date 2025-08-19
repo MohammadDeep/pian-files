@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
-def get_plot(list_sinales , list_labeles , size_plot = (120 * 3, 6), list_sacale = None, list_alpha=None, alphaes = 0.2 , Fs = 250):
+import numpy as np
+def get_plot(list_sinales , list_labeles , size_plot = (120 * 3, 6), list_sacale = None, list_alpha=None, alphaes = 1.0 , Fs = 250):
     len_data = len(list_sinales[0])
     second = len_data / Fs
     plt.figure(figsize=size_plot)
@@ -32,6 +33,6 @@ def get_plot(list_sinales , list_labeles , size_plot = (120 * 3, 6), list_sacale
 
 
 
-def show_plotes(dic_data,size_plot= (120 * .2 , 6),  list_sacale = None, list_alpha = None, alphaes = 0.2):
-  for label, signall in dic_data:
-    get_plot( [signall] , [label] , size_plot , list_sacale = None, list_alpha=None)
+def show_plotes(dic_data,list_labels = [], list_labels_title = [],size_plot= (120 * .2 , 6),  list_sacale = None, list_alpha = None, alphaes = 1.0):
+  for label, signall in dic_data.items():
+    get_plot(list_labels + [signall] , list_labels_title+[ label] , size_plot , list_sacale = list_sacale, list_alpha=list_alpha, alphaes = alphaes)

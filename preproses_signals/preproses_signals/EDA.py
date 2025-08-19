@@ -132,6 +132,7 @@ def perpros_EDA(
 
     return {'signalfiltered':signal_filtered, 
             'signalfiltered_normaliz':signal_filtered_normaliz,
-            'list_r_p_t_test_l_d_e_odj':[r, p, t_est, l, d, e, obj],
+            'r' : r, 'p': p, 't_est': t_est, 'l': l, 'd': d, 'e':e , 
+            'obj': obj,
             'dphEDA_r':dphEDA_r,
             'TVSymp':TVSymp}
