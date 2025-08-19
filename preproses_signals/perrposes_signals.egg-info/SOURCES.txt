@@ -1,0 +1,13 @@
+setup.py
+perrposes_signals.egg-info/PKG-INFO
+perrposes_signals.egg-info/SOURCES.txt
+perrposes_signals.egg-info/dependency_links.txt
+perrposes_signals.egg-info/top_level.txt
+preproses_signals/EDA.py
+preproses_signals/__init__.py
+preproses_signals/function/0_Filtering_alignment.py
+preproses_signals/function/1_Normalization.py
+preproses_signals/function/2_Multiscale_windowing.py
+preproses_signals/function/3_label_preserving.py
+preproses_signals/function/__init__.py
+preproses_signals/function/function.py
