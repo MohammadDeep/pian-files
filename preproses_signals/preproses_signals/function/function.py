@@ -14,7 +14,8 @@ def delet_nan(df):
   return df
 
 
-def data_d(data):
+def data_df(data,
+           save_len = True):
     
     """
     Input:
@@ -27,7 +28,10 @@ def data_d(data):
         them as a new numpy array.
     """
     data = np.array(data)  # ensure input is a numpy array
-    return np.diff(data)   # vectorized difference calculation
+    df_data = np.diff(data)   # vectorized difference calculation
+    if save_len:
+        df_data = np.append(df_data, df_data[-1]) 
+    return df_data
 
 
 import numpy as np
@@ -80,3 +84,30 @@ def dphEDA(signal: Sequence[float], fs: float = 2.0, padding: int = 2) -> np.nda
     y = np.pad(core, (padding, padding), mode="constant")
 
     return y
+
+def show_df_pec(signal, perc):
+  new_signal = []
+  df_signall = data_df(signal)
+
+  max_df = max(df_signall)
+  min_df = min(df_signall)
+  sum = 0
+  for i in df_signall:
+    sum = sum + i
+  mean = sum / len(df_signall)
+  #print(mean)
+  for i in df_signall:
+    if i > max_df * perc:
+      new_signal.append(abs(i))
+    elif i < min_df * perc:
+      new_signal.append(abs(i))
+    else :
+      new_signal.append(abs(mean))
+  return new_signal
+
+
+def dic_show_df_pec(dic_data, perc = 0.4):
+  dic_df_pec = {}
+  for label, signall in dic_data.items():
+    dic_df_pec['show_df_pec_' + label] = show_df_pec(signall, perc)
+  return dic_df_pec
