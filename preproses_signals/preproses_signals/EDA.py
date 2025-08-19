@@ -1,6 +1,12 @@
 import numpy as np
 from typing import Tuple
 from scipy.signal import butter, sosfiltfilt, hilbert
+from preproses_signals.function.Normalization import decimate_signal
+from preproses_signals.function.Filtering_alignment import preprocess
+from preproses_signals.function import  cvxEDA
+from preproses_signals.function.function import dphEDA
+from typing import Optional, Literal,Tuple
+from scipy.signal import medfilt
 
 def compute_TVSymp(
     eda_signal: np.ndarray,
@@ -9,7 +15,7 @@ def compute_TVSymp(
     n_centers: int = 5,
     lp_cutoff: float = 0.5,
     order: int = 4
-) -> np.ndarray:
+    ) -> np.ndarray:
     """
     Compute the time-varying sympathetic activity (TVSymp) from an EDA signal.
 
@@ -81,16 +87,9 @@ def compute_TVSymp(
     analytic = hilbert(combined.real)
     TVSymp = np.abs(analytic)   # type: ignore
     return TVSymp
-from preproses_signals.function.Normalization import decimate_signal
-from preproses_signals.function.Filtering_alignment import preprocess
-from typing import Optional, Literal,Tuple
-def perpros_EDA(
-        input_signal: np.ndarray,
-        input_fs: int,
-        factor: int,
-        ftype: Literal['iir', 'fir'] = 'iir',
-        kernel_size_mean: int = 3
 
+def perpros_EDA(
+        input_signal: np.ndarray
 ):
     
 
@@ -99,10 +98,11 @@ def perpros_EDA(
                                     input_fs  = 256,
                                     factor  = 62,
                                     ftype = 'fir')
-    from scipy.signal import medfilt
+    
 
    
-    signal_filtered = medfilt(eda_downsampled, kernel_size=kernel_size_mean)
+    signal_filtered = medfilt(eda_downsampled, 
+                              kernel_size=3)
 
     eda_downsampled_2Hz,fs2 = decimate_signal(signal_filtered,
                                               fs1, 2, ftype='fir') 
@@ -111,10 +111,27 @@ def perpros_EDA(
 
 
     signal_filtered = preprocess(
-        eda_raw = eda_downsampled_2Hz,
-        fs_in = fs2,
-        fs_out= fs2,
-        hp_cutoff  = 0.01,
-        hp_order = 4
-    ) 
+                                eda_raw = eda_downsampled_2Hz,
+                                fs_in = fs2,
+                                fs_out= fs2,
+                                hp_cutoff  = 0.01,
+                                hp_order = 4)
 
+
+
+
+    signal_filtered_normaliz = (signal_filtered - np.mean(signal_filtered)) / np.std(signal_filtered)
+
+ 
+    [r, p, t_est, l, d, e, obj] = cvxEDA.cvxEDA(signal_filtered_normaliz
+                                                , 1.0 / fs2)
+
+    dphEDA_r = dphEDA(r, fs2, 2) # type: ignore
+
+    TVSymp = compute_TVSymp(signal_filtered , fs2)
+
+    return {'signalfiltered':signal_filtered, 
+            'signalfiltered_normaliz':signal_filtered_normaliz,
+            'list_r_p_t_test_l_d_e_odj':[r, p, t_est, l, d, e, obj],
+            'dphEDA_r':dphEDA_r,
+            'TVSymp':TVSymp}
