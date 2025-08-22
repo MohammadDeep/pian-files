@@ -664,7 +664,7 @@ def number_df_signalles(signal, data, window):
 from typing import Any
 def feature_ecg(
     ecg,
-    df,
+    #df,
     window_size = 1000,
     show = True,
     fix_len = True
@@ -699,13 +699,13 @@ def feature_ecg(
   data = stpq_function_all(r_peaks, ecg_denoise, ave_denoised_ecg, plot_all_show = show, stort_plot=0, long_plot=100)
 
   # R - R
-  RR_list, list_label = RR(data[:,0].astype(int), [list(df.index), df['COVAS'], df['Heater_cleaned'],  df['Ecg']])
+  RR_list, list_label = RR(data[:,0].astype(int), [list(range(len(ecg))),  ecg])
   Seconds_RR = list_label[0]
 
-  features['Ecg_RR'] = list_label[3]
+  features['Ecg_RR'] = list_label[1]
 
 
-  var_Ecg_RR = mw.variance_window(list_label[3], 10)
+  var_Ecg_RR = mw.variance_window(list_label[1], 10)
   features['var_Ecg_RR'] = var_Ecg_RR
 
 
