@@ -1,24 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Pain-SSL Pipeline (PyTorch) — Full Script
-=========================================
-هدف: پیش‌آموزشِ خودنظارتی روی سیگنال‌های فیزیولوژیکِ چندکاناله با دو روش
-(۳.۱) Contrastive (سبک SimCLR) و (۳.۲) Masked Reconstruction (سبک MAE)،
-و سپس استخراج embedding برای آموزش یک طبقه‌بند خطی کوچک با LOOCV.
 
-روند اجرا (TL;DR):
-1) سیگنال‌های هر رکورد را به شکل [C,T] (کانال × زمان) آماده و نرمال‌سازی کنید.
-2) با windowing آن‌ها را به [N,C,win] تبدیل کنید.
-3) یکی از دو پیش‌آموزش را اجرا کنید:
-   - train_contrastive(...): یادگیری فضای شباهت
-   - train_masked_reconstruction(...): یادگیری ساختار سیگنال با بازسازی ناحیه ماسک‌شده
-4) از encoderِ آموزش‌دیده embedding بگیرید و با LOOCV یک سرِ خطی کوچک (Logistic/SVM) را آموزش/ارزیابی کنید.
-
-نکات مهم:
-- Augmentationها ملایم و سازگار با فیزیولوژی‌اند (نویز کم، اسکیل دامنه، شیفت زمانی، channel-dropout).
-- برای ECG از warping شدید اجتناب کنید؛ زمان‌بندی P-QRS-T اهمیت پزشکی دارد.
-- حتماً split را روی «رکوردها» بزنید (نه پنجره‌ها) تا leakage رخ ندهد.
-"""
 
 import os
 from typing import List, Tuple, Optional, Dict
