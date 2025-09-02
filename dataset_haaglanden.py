@@ -15,18 +15,7 @@ dir_history_model = '/home/asr/mohammadBalaghi/pian-files/__HISTORY_MODEL'
                             Create dataset
 ====================================================================                            
 '''
-import numpy as np
-from pathlib import Path
 
-folder = Path(folder)
-for f in folder.glob("*.npz"):
-    try:
-        with np.load(f, allow_pickle=False) as d:
-            _ = d["X"].shape
-            _ = d["y"].shape
-        print(f, "OK")
-    except Exception as e:
-        print(f, "BAD:", f, e)
 
 import os
 import numpy as np
