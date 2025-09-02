@@ -76,7 +76,13 @@ x1, y1 = ds[0]
 print('data shape : ', x1.shape)
 print('y shape', y1)
 print('create dataloader')
-dl = DataLoader(ds, batch_size=32, shuffle=True, num_workers=4, pin_memory=False)
+dl = DataLoader(
+    ds, batch_size=32, shuffle=True,
+    num_workers=2,                 # کم نگه دار
+    pin_memory=False,              # اگر GPU داری بعداً True کن
+    prefetch_factor=1,             # پیش‌واکشی کم
+    persistent_workers=False       # ورکرها را دائمی نکن
+)
 
 for xb, yb in dl:
     print(xb.shape, yb.shape)
