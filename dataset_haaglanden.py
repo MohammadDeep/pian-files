@@ -1,101 +1,75 @@
-import mne
-from pathlib import Path
-import pandas as pd
-
-root = Path("/media/mohammad/NewVolume/signalDataset/haaglanden-medisch-centrum-sleep-staging-database-1.1/recordings")   # مسیر پوشه
-
-
-
-
-
-def read_data_haaglanden(
-     root:str,
-     number_persion : int = 1,
-     print_data_analez : bool = False,
-     stage_map = {
-                    "Sleep stage W": 0, "W": 0,
-                    "Sleep stage N1": 1, "Sleep stage 1": 1, "N1": 1,
-                    "Sleep stage N2": 2, "Sleep stage 2": 2, "N2": 2,
-                    "Sleep stage N3": 3, "Sleep stage 3": 3, "Sleep stage 4": 3, "N3": 3,
-                    "Sleep stage R": 4, "R": 4, "REM": 4,
-                    }
-     ):
-
-     psg_file = root / f"SN{number_persion:03d}.edf" # type: ignore
-
-     raw = mne.io.read_raw_edf(psg_file, preload=True, stim_channel=None, verbose=False)
-
-     data_x = raw.get_data()
-     channel_name = raw.ch_names
+'''
+====================================================================
+                            haper pramatres
+====================================================================                            
+'''
+# folder dataset .npy
+folder = "path/to/your/folder"
 
 
 
 
 
-     scoring_edf = root / f"SN{number_persion:03d}_sleepscoring.edf" # type: ignore
+'''
+====================================================================
+                            Create dataset
+====================================================================                            
+'''
 
-     # خواندن annotation ها
-     ann = mne.read_annotations(scoring_edf)
+import os
+import numpy as np
+import torch
+from torch.utils.data import Dataset
 
-     # تبدیل به DataFrame
-     df = pd.DataFrame({
-     "start_sec": ann.onset,
-     "duration_sec": ann.duration,
-     "label": ann.description
-     })
+class MultiNpzDataset(Dataset):
+    def __init__(self, files, mmap=True, dtype=torch.float32):
+        self.files = files
+        self.mmap = mmap
+        self.dtype = dtype
+
+        # لیست طول هر فایل (برای mapping ایندکس کلی → فایل محلی)
+        self.file_lengths = []
+        for f in self.files:
+            with np.load(f, mmap_mode="r" if mmap else None) as d:
+                self.file_lengths.append(d["y"].shape[0])
+
+        self.cum_lengths = np.cumsum(self.file_lengths)
+        self.N = self.cum_lengths[-1]
+
+        # کش برای فایل جاری
+        self._z = None
+        self._current_file = None
+
+    def __len__(self):
+        return self.N
+
+    def _open_file(self, idx_file):
+        if self._current_file != idx_file:
+            self._z = np.load(self.files[idx_file], mmap_mode="r" if self.mmap else None)
+            self._current_file = idx_file
+
+    def __getitem__(self, idx):
+        # پیدا کردن فایل و ایندکس محلی
+        idx_file = np.searchsorted(self.cum_lengths, idx, side="right")
+        start = 0 if idx_file == 0 else self.cum_lengths[idx_file-1]
+        local_idx = idx - start
+
+        self._open_file(idx_file)
+
+        x = self._z["X"][local_idx] # type: ignore
+        y = int(self._z["y"][local_idx]) # type: ignore
+
+        x = torch.from_numpy(x).to(self.dtype)
+        y = torch.tensor(y, dtype=torch.long)
+
+        return x, y
 
 
+from torch.utils.data import DataLoader
+files = [f for f in os.listdir(folder) if f.endswith(".npz")]
+ds = MultiNpzDataset(files)
+dl = DataLoader(ds, batch_size=64, shuffle=True, num_workers=4, pin_memory=True)
 
-     valid_labels = set(stage_map.keys())
-     df_clean = df[df["label"].isin(valid_labels)].reset_index(drop=True)
-
-     df_clean["label"] = df_clean["label"].map(stage_map)
-
-     data_y = df_clean.astype(int).to_numpy()
-
-
-     if print_data_analez:
-          print('-' * 50)
-          print('x analize : ')
-          print('shape x: ',data_x.shape) # type: ignore
-          print('channel signal :',channel_name)
-          print('-' * 50)
-          print('y analize :')
-          print('number vlaue :' ,df["label"].value_counts())
-          print('number vlaue (clean label) :' ,df_clean["label"].value_counts())
-          print('shape label:', data_y.shape)
-          print('-' * 50)
-
-     
-     return data_x, data_y
-    
-
-
-
-
-from tqdm import tqdm
-def create_np_haaglanden(
-    root:str,
-    number_all_persion : int ,
-    #dir_save_data : str,
-    print_data_analez : bool = False,
-    stage_map = {
-                "Sleep stage W": 0, "W": 0,
-                "Sleep stage N1": 1, "Sleep stage 1": 1, "N1": 1,
-                "Sleep stage N2": 2, "Sleep stage 2": 2, "N2": 2,
-                "Sleep stage N3": 3, "Sleep stage 3": 3, "Sleep stage 4": 3, "N3": 3,
-                "Sleep stage R": 4, "R": 4, "REM": 4,
-                }
-    ):
-    for i in tqdm(range(number_all_persion)):
-        number_persion = i + 1
-        try:
-            x, y = read_data_haaglanden(
-            root = root,
-            number_persion  = number_persion ,
-            print_data_analez  = print_data_analez,
-            stage_map = stage_map
-            )
-            
-        except:
-            print(f'file {number_persion} is not define.')
+for xb, yb in dl:
+    print(xb.shape, yb.shape)
+    break
