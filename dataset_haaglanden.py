@@ -4,7 +4,7 @@
 ====================================================================                            
 '''
 # folder dataset .npy
-folder = "path/to/your/folder"
+folder = "/home/asr/mohammadBalaghi/dataset_signal/newdatahaag"
 
 
 
