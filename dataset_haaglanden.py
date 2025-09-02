@@ -122,13 +122,13 @@ model = CNN_LSTM_Model(net1, lstm1)
 
 N = 30  * 256
 # ورودی به مدل باید یک تنسور باشد
-dummy_input = torch.randn(32, 3, N)  # [batch_size, channels, sequence_length]
+dummy_input = torch.randn(32, 8, N)  # [batch_size, channels, sequence_length]
 with torch.no_grad():
     output = model(dummy_input)
 print(output.size())
 
 from torchinfo import summary
-summary(model, input_size=(32, 3, N)) 
+summary(model, input_size=(32, 8, N)) 
 
  
 from vision.train_val_functiones.train_val_functiones import train
