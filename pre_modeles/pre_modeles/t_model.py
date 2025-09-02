@@ -348,6 +348,28 @@ class CNN_LSTM_Model1(nn.Module):
         # خروجی output: [batch_size, num_classes]
         
         return output
+    
+class CNN_LSTM_Model2(nn.Module):
+    def __init__(self, cnn_model: SimpleResNet2, lstm_model: LSTM_Model):
+        super(CNN_LSTM_Model2, self).__init__()
+        self.cnn = cnn_model
+        self.lstm = lstm_model
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # 1. استخراج ویژگی با CNN
+        # ورودی x: [batch_size, in_channels, sequence_length]
+        features = self.cnn(x)
+        # خروجی features: [batch_size, cnn_output_channels, cnn_output_length]
+        
+        # 2. آماده‌سازی برای LSTM
+        # نیاز به تغییر ابعاد از [B, C, L] به [B, L, C]
+        features = features.permute(0, 2, 1)
+        
+        # 3. طبقه‌بندی با LSTM
+        output = self.lstm(features)
+        # خروجی output: [batch_size, num_classes]
+        
+        return output
 # --- نمونهٔ استفاده ---
 if __name__ == "__main__":
     N  = 256*8 * 1+ 0* 256//32
@@ -394,7 +416,7 @@ if __name__ == "__main__":
                    hidden_size = 2,
                      num_layers = 2, 
                      num_classes = 3)
-    model4 = CNN_LSTM_Model(net4, lstm4)
+    model4 = CNN_LSTM_Model1(net4, lstm4)
 
     '''
     start lne  = 4 * 256
@@ -405,7 +427,7 @@ if __name__ == "__main__":
                    hidden_size = 2,
                      num_layers = 2, 
                      num_classes = 3)
-    model5 = CNN_LSTM_Model(net5, lstm5)
+    model5 = CNN_LSTM_Model1(net5, lstm5)
   
     '''
     start lne  = 2* 256
@@ -416,7 +438,7 @@ if __name__ == "__main__":
                    hidden_size = 2,
                      num_layers = 2, 
                      num_classes = 3)
-    model6 = CNN_LSTM_Model(net6, lstm6)
+    model6 = CNN_LSTM_Model1(net6, lstm6)
 
     '''
     start lne  =   256//32
@@ -427,7 +449,7 @@ if __name__ == "__main__":
                    hidden_size = 2,
                      num_layers = 2, 
                      num_classes = 3)
-    model7 = CNN_LSTM_Model(net7, lstm7)
+    model7 = CNN_LSTM_Model2(net7, lstm7)
 
 
 
