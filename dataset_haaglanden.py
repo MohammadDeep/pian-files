@@ -67,6 +67,7 @@ class MultiNpzDataset(Dataset):
 
 from torch.utils.data import DataLoader
 files = [f for f in os.listdir(folder) if f.endswith(".npz")]
+print(files)
 ds = MultiNpzDataset(files)
 dl = DataLoader(ds, batch_size=64, shuffle=True, num_workers=4, pin_memory=True)
 
