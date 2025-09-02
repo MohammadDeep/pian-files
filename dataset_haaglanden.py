@@ -135,19 +135,32 @@ from vision.train_val_functiones.train_val_functiones import train
 import torch.nn as nn
 loss_function = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-4)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print("Using device:", device)
 
-hstory = train(model = model,
-                    train_dataloader = dataloader_train,
-                    test_dataloader = dataloader_val,
-                    optimizer = optimizer,
-                    model_name = 'multe_classes_model1',
-                    loss_fn = loss_function,
-                    results = None,
-                    epochs = EPOCHES,
-                    number_ep = 1000,
-                    use_sigmoid = True,
-                    dir_history_model = dir_history_model, # type: ignore
-                    latest_epoch = -1,
-                    strict = True)
+
+for epoch in range(EPOCHES):
+    model.train()
+    for xb, yb in dataloader_train:
+        xb, yb = xb.to(device), yb.to(device)
+
+        optimizer.zero_grad()
+        logits = model(xb)             # [B, n_classes]
+        loss = loss_function(logits, yb)   # CrossEntropy
+
+        loss.backward()
+        optimizer.step()
+    with torch.no_grad():
+        model.eval()
+        correct, total = 0, 0
+        for xb, yb in dataloader_val:
+            logits = model(xb)
+            preds = logits.argmax(dim=1)   # softmax لازم نیست
+            correct += (preds == yb).sum().item()
+            total += yb.size(0)
+        acc = correct / total
+        print("val acc:", acc)
+
+
 
 
