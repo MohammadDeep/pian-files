@@ -112,7 +112,7 @@ from pre_modeles.pre_modeles.t_model import SimpleResNet,CNN_LSTM_Model,BasicBlo
 start lne  = 2 * 256
 step  = 2 * 256
 '''
-net1 = SimpleResNet(BasicBlock, layers=[1,1,1,2,2],list_step = [2,2,2,1,1], in_ch=3, base_planes=16)
+net1 = SimpleResNet(BasicBlock, layers=[1,1,1,2,2],list_step = [2,2,2,1,1], in_ch=8, base_planes=16)
 lstm1 = LSTM_Model(input_size = 256,
                     hidden_size = 128,
                     num_layers = 2, 
