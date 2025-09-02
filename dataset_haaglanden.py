@@ -79,7 +79,7 @@ print('create dataloader')
 dl = DataLoader(
     ds, batch_size=32, shuffle=True,
     num_workers=2,                 # کم نگه دار
-    pin_memory=False,              # اگر GPU داری بعداً True کن
+    pin_memory=True,              # اگر GPU داری بعداً True کن
     prefetch_factor=1,             # پیش‌واکشی کم
     persistent_workers=False       # ورکرها را دائمی نکن
 )
