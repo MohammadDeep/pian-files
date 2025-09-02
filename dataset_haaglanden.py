@@ -62,7 +62,7 @@ class MultiNpzDataset(Dataset):
         x = torch.from_numpy(x).to(self.dtype)
         y = torch.tensor(y, dtype=torch.long)
        
-        y = F.one_hot(y, num_classes=5.float()
+        y = F.one_hot(y, num_classes=5).float()
 
         return x, y
 
