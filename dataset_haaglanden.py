@@ -5,9 +5,9 @@
 '''
 # folder dataset .npy
 folder = "/home/asr/mohammadBalaghi/dataset_signal/newdatahaag"
+EPOCHES = 100
 
-
-
+dir_history_model = '/home/asr/mohammadBalaghi/pian-files/__HISTORY_MODEL'
 
 
 '''
@@ -70,21 +70,31 @@ files = [f for f in os.listdir(folder) if f.endswith(".npz")]
 print(files)
 print(len(files))
 files =[f'{folder}/{f}' for f in files]
+file_val = files[:20]
+file_train = files[20:]
 print('start create dataset')
-ds = MultiNpzDataset(files)
-x1, y1 = ds[0]
+dataset_train = MultiNpzDataset(file_train)
+dataset_val = MultiNpzDataset(file_val)
+x1, y1 = dataset_train[0]
 print('data shape : ', x1.shape)
 print('y shape', y1)
 print('create dataloader')
-dl = DataLoader(
-    ds, batch_size=32, shuffle=True,
+dataloader_train = DataLoader(
+    dataset_train, batch_size=32, shuffle=True,
+    num_workers=2,                 # کم نگه دار
+    pin_memory=True,              # اگر GPU داری بعداً True کن
+    prefetch_factor=1,             # پیش‌واکشی کم
+    persistent_workers=False       # ورکرها را دائمی نکن
+)
+dataloader_val = DataLoader(
+    dataset_val, batch_size=32, shuffle=False,
     num_workers=2,                 # کم نگه دار
     pin_memory=True,              # اگر GPU داری بعداً True کن
     prefetch_factor=1,             # پیش‌واکشی کم
     persistent_workers=False       # ورکرها را دائمی نکن
 )
 
-for xb, yb in dl:
+for xb, yb in dataset_train:
     print(xb.shape, yb.shape)
     break
 
@@ -119,5 +129,25 @@ print(output.size())
 
 from torchinfo import summary
 summary(model, input_size=(32, 3, N)) 
+
+ 
+from vision.train_val_functiones.train_val_functiones import train
+import torch.nn as nn
+loss_function = nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-4)
+
+hstory = train(model = model,
+                    train_dataloader = dataloader_train,
+                    test_dataloader = dataloader_val,
+                    optimizer = optimizer,
+                    model_name = 'multe_classes_model1',
+                    loss_fn = loss_function,
+                    results = None,
+                    epochs = EPOCHES,
+                    number_ep = 1000,
+                    use_sigmoid = True,
+                    dir_history_model = dir_history_model, # type: ignore
+                    latest_epoch = -1,
+                    strict = True)
 
 

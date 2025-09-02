@@ -1,0 +1,17 @@
+setup.py
+vision/Config.py
+vision/Create_Dataset.py
+vision/Create_dasae_Folder.py
+vision/__init__.py
+vision.egg-info/PKG-INFO
+vision.egg-info/SOURCES.txt
+vision.egg-info/dependency_links.txt
+vision.egg-info/top_level.txt
+vision/Create_dase_Fimage/__init__.py
+vision/Create_dase_Fimage/chek_data.py
+vision/Create_dase_Fimage/create_folber_dataset.py
+vision/perproses_image/Cut_Image.py
+vision/perproses_image/__init__.py
+vision/train_val_functiones/__init__.py
+vision/train_val_functiones/im_show.py
+vision/train_val_functiones/train_val_functiones.py
