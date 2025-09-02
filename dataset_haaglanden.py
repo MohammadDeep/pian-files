@@ -138,29 +138,58 @@ optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-4)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using device:", device)
 
+from tqdm import tqdm
+import torch
 
-for epoch in range(EPOCHES):
+for epoch in tqdm(range(EPOCHES)):
+    # ------------------------------
+    # Train
+    # ------------------------------
     model.train()
-    for xb, yb in dataloader_train:
+    total_loss, correct, total = 0.0, 0, 0
+    
+    for xb, yb in tqdm(dataloader_train, desc=f"Epoch {epoch+1}/{EPOCHES} [train]"):
         xb, yb = xb.to(device), yb.to(device)
 
         optimizer.zero_grad()
-        logits = model(xb)             # [B, n_classes]
-        loss = loss_function(logits, yb)   # CrossEntropy
+        logits = model(xb)                     # [B, n_classes]
+        loss = loss_function(logits, yb)       # CrossEntropy
 
         loss.backward()
         optimizer.step()
+
+        # آمار
+        total_loss += loss.item() * xb.size(0)     # sum loss (وزن‌دار به اندازه batch)
+        preds = logits.argmax(dim=1)
+        correct += (preds == yb).sum().item()
+        total += yb.size(0)
+
+    train_loss = total_loss / total
+    train_acc = correct / total
+
+    # ------------------------------
+    # Validation
+    # ------------------------------
+    model.eval()
+    val_loss, val_correct, val_total = 0.0, 0, 0
     with torch.no_grad():
-        model.eval()
-        correct, total = 0, 0
-        for xb, yb in dataloader_val:
+        for xb, yb in tqdm(dataloader_val, desc=f"Epoch {epoch+1}/{EPOCHES} [val]"):
+            xb, yb = xb.to(device), yb.to(device)
+
             logits = model(xb)
-            preds = logits.argmax(dim=1)   # softmax لازم نیست
-            correct += (preds == yb).sum().item()
-            total += yb.size(0)
-        acc = correct / total
-        print("val acc:", acc)
+            loss = loss_function(logits, yb)
 
+            val_loss += loss.item() * xb.size(0)
+            preds = logits.argmax(dim=1)
+            val_correct += (preds == yb).sum().item()
+            val_total += yb.size(0)
 
+    val_loss /= val_total
+    val_acc = val_correct / val_total
 
-
+    # ------------------------------
+    # Print summary
+    # ------------------------------
+    print(f"Epoch {epoch+1}/{EPOCHES} "
+          f"| train loss: {train_loss:.4f}, train acc: {train_acc:.3f} "
+          f"| val loss: {val_loss:.4f}, val acc: {val_acc:.3f}")
