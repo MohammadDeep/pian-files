@@ -76,7 +76,7 @@ x1, y1 = ds[0]
 print('data shape : ', x1.shape)
 print('y shape', y1)
 print('create dataloader')
-dl = DataLoader(ds, batch_size=64, shuffle=True, num_workers=4, pin_memory=True)
+dl = DataLoader(ds, batch_size=32, shuffle=True, num_workers=4, pin_memory=True)
 
 for xb, yb in dl:
     print(xb.shape, yb.shape)
