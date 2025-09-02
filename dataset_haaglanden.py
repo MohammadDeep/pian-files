@@ -20,7 +20,7 @@ import os
 import numpy as np
 import torch
 from torch.utils.data import Dataset
-
+import torch.nn.functional as F
 class MultiNpzDataset(Dataset):
     def __init__(self, files, mmap=True, dtype=torch.float32):
         self.files = files
@@ -61,6 +61,8 @@ class MultiNpzDataset(Dataset):
 
         x = torch.from_numpy(x).to(self.dtype)
         y = torch.tensor(y, dtype=torch.long)
+       
+        y = F.one_hot(y, num_classes=5.float()
 
         return x, y
 
@@ -116,7 +118,7 @@ net1 = SimpleResNet(BasicBlock, layers=[1,1,1,2,2],list_step = [2,2,2,1,1], in_c
 lstm1 = LSTM_Model(input_size = 256,
                     hidden_size = 128,
                     num_layers = 2, 
-                    num_classes = 4)
+                    num_classes = 5)
 model = CNN_LSTM_Model(net1, lstm1)
 
 
