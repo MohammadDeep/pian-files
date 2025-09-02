@@ -18,7 +18,7 @@ dir_history_model = '/home/asr/mohammadBalaghi/pian-files/__HISTORY_MODEL'
 import numpy as np
 from pathlib import Path
 
-folder = Path("/path/to/your/npz/files")
+folder = Path(folder)
 for f in folder.glob("*.npz"):
     try:
         with np.load(f, allow_pickle=False) as d:
