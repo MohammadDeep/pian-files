@@ -163,7 +163,9 @@ for epoch in tqdm(range(EPOCHES)):
         # آمار
         total_loss += loss.item() * xb.size(0)     # sum loss (وزن‌دار به اندازه batch)
         preds = logits.argmax(dim=1)
-        correct += (preds == yb).sum().item()
+        labels = yb.argmax(dim=1)   # one-hot → index
+        correct += (preds == labels).sum().item()
+
         total += yb.size(0)
 
     train_loss = total_loss / total
@@ -183,7 +185,8 @@ for epoch in tqdm(range(EPOCHES)):
 
             val_loss += loss.item() * xb.size(0)
             preds = logits.argmax(dim=1)
-            val_correct += (preds == yb).sum().item()
+            labels = yb.argmax(dim=1)   # one-hot → index
+            val_correct += (preds == labels).sum().item()
             val_total += yb.size(0)
 
     val_loss /= val_total
