@@ -87,3 +87,37 @@ dl = DataLoader(
 for xb, yb in dl:
     print(xb.shape, yb.shape)
     break
+
+
+
+
+'''
+====================================================================
+                            Create modeles
+====================================================================                            
+'''
+
+from pre_modeles.pre_modeles.t_model import SimpleResNet,CNN_LSTM_Model,BasicBlock,CNN_LSTM_Model,LSTM_Model
+'''
+start lne  = 2 * 256
+step  = 2 * 256
+'''
+net1 = SimpleResNet(BasicBlock, layers=[1,1,1,2,2],list_step = [2,2,2,1,1], in_ch=3, base_planes=16)
+lstm1 = LSTM_Model(input_size = 256,
+                    hidden_size = 128,
+                    num_layers = 2, 
+                    num_classes = 4)
+model = CNN_LSTM_Model(net1, lstm1)
+
+
+N = 30  * 256
+# ورودی به مدل باید یک تنسور باشد
+dummy_input = torch.randn(32, 3, N)  # [batch_size, channels, sequence_length]
+with torch.no_grad():
+    output = model(dummy_input)
+print(output.size())
+
+from torchinfo import summary
+summary(model, input_size=(32, 3, N)) 
+
+

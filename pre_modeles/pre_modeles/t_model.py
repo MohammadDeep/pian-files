@@ -371,90 +371,90 @@ class CNN_LSTM_Model2(nn.Module):
         
         return output
 # --- نمونهٔ استفاده ---
+#if __name__ == "__main__":
+N  = 256*8 * 30+ 0* 256//32
+'''
+start lne  = 2 * 256
+step  = 2 * 256
+'''
+net1 = SimpleResNet(BasicBlock, layers=[1,1,1,2,2],list_step = [2,2,2,1,1], in_ch=3, base_planes=16)
+lstm1 = LSTM_Model(input_size = 256,
+                hidden_size = 2,
+                    num_layers = 2, 
+                    num_classes = 3)
+model1 = CNN_LSTM_Model(net1, lstm1)
+
+'''
+start lne  = 1 * 256
+step  = 1 * 256
+'''
+net2 = SimpleResNet(BasicBlock, layers=[1,1,1,2,2],list_step = [2,2,1,1,1], in_ch=3, base_planes=16)
+lstm2 = LSTM_Model(input_size = 256,
+                hidden_size = 2,
+                    num_layers = 2, 
+                    num_classes = 3)
+model2 = CNN_LSTM_Model(net2, lstm2)
+
+'''
+start lne  = .5 * 256
+step  = .5 * 256
+'''
+net3 = SimpleResNet(BasicBlock, layers=[1,1,1,2,2],list_step = [2,1,1,1,1], in_ch=3, base_planes=16)
+lstm3 = LSTM_Model(input_size = 256,
+                hidden_size = 2,
+                    num_layers = 2, 
+                    num_classes = 3)
+model3 = CNN_LSTM_Model(net3, lstm3)
+
+'''
+start lne  = 1 * 256
+step  = 1 * 256
+'''
+
+net4 = SimpleResNet1(BasicBlock, layers=[1,1,1,2,2,2,2],list_step = [2,1,1,1,1,1,1], in_ch=3, base_planes=4)
+lstm4 = LSTM_Model(input_size = 256,
+                hidden_size = 2,
+                    num_layers = 2, 
+                    num_classes = 3)
+model4 = CNN_LSTM_Model1(net4, lstm4)
+
+'''
+start lne  = 4 * 256
+step  = 4 * 256
+'''
+net5 = SimpleResNet1(BasicBlock, layers=[2,2,2,2,2,2,2],list_step = [2,2,1,1,1,1,1], in_ch=3, base_planes=4)
+lstm5 = LSTM_Model(input_size = 256,
+                hidden_size = 2,
+                    num_layers = 2, 
+                    num_classes = 3)
+model5 = CNN_LSTM_Model1(net5, lstm5)
+
+'''
+start lne  = 2* 256
+step  = 2 * 256
+'''
+net6 = SimpleResNet1(BasicBlock, layers=[2,2,2,2,2,2,2],list_step = [2,1,1,1,1,1,1], in_ch=3, base_planes=4)
+lstm6 = LSTM_Model(input_size = 256,
+                hidden_size = 2,
+                    num_layers = 2, 
+                    num_classes = 3)
+model6 = CNN_LSTM_Model1(net6, lstm6)
+
+'''
+start lne  =   256//32
+step  = 256//32
+'''
+net7 = SimpleResNet2(BasicBlock, layers=[1,1,1,1,1,1,1,1,1,1,1,1],list_step = [2,2,1,1,1,1,1,1,1,1,1], in_ch=3, base_planes=4) 
+lstm7 = LSTM_Model(input_size = 64,
+                hidden_size = 2,
+                    num_layers = 2, 
+                    num_classes = 3)
+model7 = CNN_LSTM_Model2(net7, lstm7)
+
+
+
+
 if __name__ == "__main__":
-    N  = 256*8 * 1+ 0* 256//32
-    '''
-    start lne  = 2 * 256
-    step  = 2 * 256
-    '''
-    net1 = SimpleResNet(BasicBlock, layers=[1,1,1,2,2],list_step = [2,2,2,1,1], in_ch=3, base_planes=16)
-    lstm1 = LSTM_Model(input_size = 256,
-                   hidden_size = 2,
-                     num_layers = 2, 
-                     num_classes = 3)
-    model1 = CNN_LSTM_Model(net1, lstm1)
-    
-    '''
-    start lne  = 1 * 256
-    step  = 1 * 256
-    '''
-    net2 = SimpleResNet(BasicBlock, layers=[1,1,1,2,2],list_step = [2,2,1,1,1], in_ch=3, base_planes=16)
-    lstm2 = LSTM_Model(input_size = 256,
-                   hidden_size = 2,
-                     num_layers = 2, 
-                     num_classes = 3)
-    model2 = CNN_LSTM_Model(net2, lstm2)
-  
-    '''
-    start lne  = .5 * 256
-    step  = .5 * 256
-    '''
-    net3 = SimpleResNet(BasicBlock, layers=[1,1,1,2,2],list_step = [2,1,1,1,1], in_ch=3, base_planes=16)
-    lstm3 = LSTM_Model(input_size = 256,
-                   hidden_size = 2,
-                     num_layers = 2, 
-                     num_classes = 3)
-    model3 = CNN_LSTM_Model(net3, lstm3)
-
-    '''
-    start lne  = 1 * 256
-    step  = 1 * 256
-    '''
-
-    net4 = SimpleResNet1(BasicBlock, layers=[1,1,1,2,2,2,2],list_step = [2,1,1,1,1,1,1], in_ch=3, base_planes=4)
-    lstm4 = LSTM_Model(input_size = 256,
-                   hidden_size = 2,
-                     num_layers = 2, 
-                     num_classes = 3)
-    model4 = CNN_LSTM_Model1(net4, lstm4)
-
-    '''
-    start lne  = 4 * 256
-    step  = 4 * 256
-    '''
-    net5 = SimpleResNet1(BasicBlock, layers=[2,2,2,2,2,2,2],list_step = [2,2,1,1,1,1,1], in_ch=3, base_planes=4)
-    lstm5 = LSTM_Model(input_size = 256,
-                   hidden_size = 2,
-                     num_layers = 2, 
-                     num_classes = 3)
-    model5 = CNN_LSTM_Model1(net5, lstm5)
-  
-    '''
-    start lne  = 2* 256
-    step  = 2 * 256
-    '''
-    net6 = SimpleResNet1(BasicBlock, layers=[2,2,2,2,2,2,2],list_step = [2,1,1,1,1,1,1], in_ch=3, base_planes=4)
-    lstm6 = LSTM_Model(input_size = 256,
-                   hidden_size = 2,
-                     num_layers = 2, 
-                     num_classes = 3)
-    model6 = CNN_LSTM_Model1(net6, lstm6)
-
-    '''
-    start lne  =   256//32
-    step  = 256//32
-    '''
-    net7 = SimpleResNet2(BasicBlock, layers=[1,1,1,1,1,1,1,1,1,1,1,1],list_step = [2,2,1,1,1,1,1,1,1,1,1], in_ch=3, base_planes=4) 
-    lstm7 = LSTM_Model(input_size = 64,
-                   hidden_size = 2,
-                     num_layers = 2, 
-                     num_classes = 3)
-    model7 = CNN_LSTM_Model2(net7, lstm7)
-
-
-
-
-
     # ورودی به مدل باید یک تنسور باشد
     dummy_input = torch.randn(32, 3, N)  # [batch_size, channels, sequence_length]
     with torch.no_grad():
@@ -462,4 +462,4 @@ if __name__ == "__main__":
     print(output.size())
 
     from torchinfo import summary
-    summary(net1, input_size=(32, 3, N)) 
+    summary(model1, input_size=(32, 3, N)) 
