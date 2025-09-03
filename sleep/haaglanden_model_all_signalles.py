@@ -161,8 +161,8 @@ def compute_channel_stats(root_dir, x_pattern="X_*.npy", eps=1e-12):
 from torch.utils.data import random_split
 
 root_dir = "/home/asr/mohammadBalaghi/dataset_signal/newdatahaag1/train"
-root_dir_val = "/home/asr/mohammadBalaghi/dataset_signal/newdatahaag1/val"
 
+root_dir_val = "/home/asr/mohammadBalaghi/dataset_signal/newdatahaag1/val"
 # (اختیاری) یک بار محاسبه و ذخیره کن، بعداً همان را استفاده کن:
 stats = compute_channel_stats(root_dir)
 print("stats:", stats)  # {'mean': [...], 'std': [...]}
