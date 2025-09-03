@@ -26,97 +26,249 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 import torch.nn.functional as F
+import os, glob
+import numpy as np
+import torch
+from torch.utils.data import Dataset, DataLoader, WeightedRandomSampler, Subset
 
-class MultiNpzDataset(Dataset):
-    def __init__(self, files,files_y, mmap=True, dtype=torch.float32):
-        self.files = files
-        self.files_y = files_y
-        self.mmap = mmap
-        self.dtype = dtype
+class ShardedNPYDataset(Dataset):
+    """
+    شاردها را مثل X_000.npy / y_000.npy می‌خواند (X: [N, C, T], y: [N]).
+    خواندن با mmap انجام می‌شود تا رم زیاد مصرف نشود.
+    """
+    def __init__(self, root_dir,
+                 x_pattern="X_*.npy",
+                 y_pattern="y_*.npy",
+                 transform=None,
+                 normalize=None,     # None یا dict مثل {"mean": [..], "std": [..]}
+                 dtype_x=torch.float32,
+                 dtype_y=torch.long):
+        self.root_dir = str(root_dir)
+        self.transform = transform
+        self.normalize = normalize
+        self.dtype_x = dtype_x
+        self.dtype_y = dtype_y
 
-        '''# لیست طول هر فایل (برای mapping ایندکس کلی → فایل محلی)
-        self.file_lengths = []
-        for f in self.files_y:
-            d = np.load(f)                      # mmap_mode نگذار؛ روی npz فشرده اثری ندارد
-            self.file_lengths.append(d.shape[0])
-            if hasattr(d, "close"):
-                d.close()
-        '''
-        '''
-        self.cum_lengths = np.cumsum(self.file_lengths)
-        self.N = self.cum_lengths[-1]
-        '''
-        # کش برای فایل جاری
-        self._z = None
-        self._current_file = None
+        # پیدا کردن شاردهای جفت
+        xs = sorted(glob.glob(os.path.join(self.root_dir, x_pattern)))
+        ys = sorted(glob.glob(os.path.join(self.root_dir, y_pattern)))
+        assert len(xs) == len(ys) and len(xs) > 0, "تعداد X و y برابر/غیرصفر نیست"
+
+        # mmap برای هر شارد
+        self.shards = []
+        self.cum_lens = [0]
+        for x_path, y_path in zip(xs, ys):
+            X = np.load(x_path, mmap_mode='r')  # شکل: (N, C, T)
+            y = np.load(y_path, mmap_mode='r')  # شکل: (N,)
+            assert X.shape[0] == y.shape[0], f"عدم تطابق N در {x_path}"
+            self.shards.append((X, y, x_path, y_path))
+            self.cum_lens.append(self.cum_lens[-1] + X.shape[0])
+
+        self.total_len = self.cum_lens[-1]
+
+        # اگر normalize داده شد، به آرایهٔ کانالی تبدیلش می‌کنیم (C, 1) برای broadcast
+        if self.normalize is not None:
+            m = np.asarray(self.normalize["mean"], dtype=np.float32)
+            s = np.asarray(self.normalize["std"],  dtype=np.float32)
+            self.norm_mean = torch.from_numpy(m)[:, None]  # (C,1)
+            self.norm_std  = torch.from_numpy(s)[:, None]  # (C,1)
+        else:
+            self.norm_mean, self.norm_std = None, None
 
     def __len__(self):
-        return self.N
+        return self.total_len
 
-    def _open_file(self, idx_file):
-        if self._current_file != idx_file:
-            self._x = np.load(self.files[idx_file], mmap_mode="r" if self.mmap else None)
-            self._y = np.load(self.files_y[idx_file], mmap_mode="r" if self.mmap else None)
-            self._current_file = idx_file
+    def _locate(self, idx):
+        # idx جهانی → (idx شارد، offset داخل شارد)
+        # باینری‌سرچ سریع‌تر است، ولی همین خطی هم معمولاً کافی است.
+        lo, hi = 0, len(self.cum_lens)-1
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if idx < self.cum_lens[mid]:
+                hi = mid
+            else:
+                lo = mid + 1
+        shard_idx = lo - 1
+        offset = idx - self.cum_lens[shard_idx]
+        return shard_idx, offset
 
     def __getitem__(self, idx):
-        # پیدا کردن فایل و ایندکس محلی
-        idx_file = np.searchsorted(self.cum_lengths, idx, side="right")
-        start = 0 if idx_file == 0 else self.cum_lengths[idx_file-1]
-        local_idx = idx - start
+        shard_idx, k = self._locate(idx)
+        X, y, _, _ = self.shards[shard_idx]
 
-        self._open_file(idx_file)
+        x_np = X[k]   # (C, T)  از نوع numpy.memmap
+        y_np = y[k]   # ()      numpy.int
 
-        x = self._x["X"][local_idx] # type: ignore
-        y = int(self._y["y"][local_idx]) # type: ignore
+        x = torch.from_numpy(np.array(x_np, copy=False)).to(self.dtype_x)  # (C,T)
+        if self.norm_mean is not None:
+            # نرمال‌سازی per-channel: (C,T) ← (C,1) broadcast
+            x = (x - self.norm_mean) / (self.norm_std + 1e-6)
 
-        #x = torch.from_numpy(x).to(self.dtype)
-        #y = torch.tensor(y, dtype=torch.long)
-        x = torch.from_numpy(x).to(self.dtype)
-        y = torch.tensor(int(self._z["y"][local_idx]), dtype=torch.long) # type: ignore
-        
-        return x, y
+        if self.transform is not None:
+            x = self.transform(x)  # اگر augment داری
 
-'''
-from torch.utils.data import DataLoader
-files = [f for f in os.listdir(folder) if f.endswith(".npz")]
-print(files)
-print(len(files))
+        y_t = torch.tensor(int(y_np), dtype=self.dtype_y)
+        return x, y_t
 
-files =[f"/home/asr/mohammadBalaghi/dataset_signal/newdatahaag1/X_all_end{i}.npy" for i in [21, 42 , 63, 84]]
-files_y =[f"/home/asr/mohammadBalaghi/dataset_signal/newdatahaag1/y_all_end{i}.npy" for i in [21, 42 , 63, 84]]
-file_val = files[:1]
-file_val_y = files_y[:1]
-file_train = files[1:]
-file_train_y = files_y[1:]
-print('start create dataset')
-dataset_train = MultiNpzDataset(file_train, file_train_y)
-dataset_val = MultiNpzDataset(file_val,file_val_y)
-x1, y1 = dataset_train[0]
-print('data shape : ', x1.shape)
-print('y shape', y1)
-print('create dataloader')
-dataloader_train = DataLoader(
-    dataset_train, batch_size=32, shuffle=True,
-    num_workers=2,                 # کم نگه دار
-    pin_memory=True,              # اگر GPU داری بعداً True کن
-    prefetch_factor=1,             # پیش‌واکشی کم
-    persistent_workers=False       # ورکرها را دائمی نکن
-)
-dataloader_val = DataLoader(
-    dataset_val, batch_size=32, shuffle=False,
-    num_workers=2,                 # کم نگه دار
-    pin_memory=True,              # اگر GPU داری بعداً True کن
-    prefetch_factor=1,             # پیش‌واکشی کم
-    persistent_workers=False       # ورکرها را دائمی نکن
-)
+def compute_channel_stats(root_dir, x_pattern="X_*.npy", eps=1e-12):
+    """
+    میانگین و std کانالی (روی محور نمونه‌ها و زمان) را به‌صورت استریم محاسبه می‌کند.
+    خروجی: dict {'mean': [C], 'std': [C]}
+    """
+    xs = sorted(glob.glob(os.path.join(root_dir, x_pattern)))
+    assert len(xs) > 0
 
-for xb, yb in dataset_train:
-    print(xb.shape, yb.shape)
-    break
-'''
+    # اول شکل C را پیدا کنیم
+    X0 = np.load(xs[0], mmap_mode='r')
+    _, C, T = X0.shape
+
+    count = 0
+    sum_c = np.zeros(C, dtype=np.float64)
+    sumsq_c = np.zeros(C, dtype=np.float64)
+
+    for x_path in xs:
+        X = np.load(x_path, mmap_mode='r')   # (N, C, T)
+        N = X.shape[0]
+        # به‌جای لود کامل، روی محور (N,T) میانگین و مربع‌میانگین را می‌گیریم:
+        # mean over axes (0,2): خروجی (C,)
+        m = X.mean(axis=(0,2))        # (C,)
+        v = ((X**2).mean(axis=(0,2))) # (C,)
+
+        # تبدیل به جمع کلی با وزن N*T
+        weight = N * T
+        sum_c   += m * weight
+        sumsq_c += v * weight
+        count   += weight
+
+    mean = (sum_c / count).astype(np.float32)
+    var  = (sumsq_c / count - mean**2).clip(min=eps).astype(np.float32)
+    std  = np.sqrt(var)
+    return {"mean": mean.tolist(), "std": std.tolist()}
+
+from torch.utils.data import random_split
+
+root_dir = "/home/asr/mohammadBalaghi/dataset_signal/newdatahaag1"
+
+# (اختیاری) یک بار محاسبه و ذخیره کن، بعداً همان را استفاده کن:
+stats = compute_channel_stats(root_dir)
+print("stats:", stats)  # {'mean': [...], 'std': [...]}
+
+full_ds = ShardedNPYDataset(root_dir, normalize=stats)
+
+# اسپلیتِ ساده (۸۰/۲۰)
+n_total = len(full_ds)
+n_train = int(0.8 * n_total)
+n_val   = n_total - n_train
+train_ds, val_ds = random_split(full_ds, [n_train, n_val], generator=torch.Generator().manual_seed(42))
+
+# (اختیاری) وزن کلاس‌ها و WeightedRandomSampler برای دیتاست train
+# ابتدا شمارش کلاس‌ها:
+def count_classes(ds, max_scan=200000):
+    from collections import Counter
+    cnt = Counter()
+    L = min(len(ds), max_scan)
+    for i in range(L):
+        _, y = ds[i]
+        cnt[int(y.item())] += 1
+    return cnt
+
+cls_counts = count_classes(train_ds)
+print("train class counts:", cls_counts)
+
+num_classes = max(cls_counts.keys()) + 1
+counts = np.zeros(num_classes, dtype=np.float64)
+for k,v in cls_counts.items():
+    counts[k] = v
+class_weights = 1.0 / np.clip(counts, 1, None)
+sample_weights = []
+for _, y in train_ds:
+    sample_weights.append(class_weights[int(y)])
+sample_weights = torch.tensor(sample_weights, dtype=torch.float)
+
+sampler = WeightedRandomSampler(weights=sample_weights,
+                                num_samples=len(sample_weights),
+                                replacement=True)
+
+# DataLoader ها
+BATCH_SIZE = 128
+train_loader = DataLoader(train_ds, batch_size=BATCH_SIZE,
+                          sampler=sampler, num_workers=4,
+                          pin_memory=True, drop_last=True)
+
+val_loader = DataLoader(val_ds, batch_size=BATCH_SIZE,
+                        shuffle=False, num_workers=4,
+                        pin_memory=True)
 
 
+
+
+
+############################
+import torch
+import numpy as np
+
+# ---------- 1) نمونهٔ مستقیم از Dataset (قبل از DataLoader) ----------
+def check_one_sample(ds, name="dataset"):
+    x, y = ds[0]     # یک نمونه
+    print(f"[{name}] sample x shape:", tuple(x.shape), "| dtype:", x.dtype)
+    print(f"[{name}] sample y:", int(y), "| dtype:", y.dtype)
+
+    # نرمال‌سازی درست؟ (اگر normalize انجام شده، میانگین نزدیک 0 و std نزدیک 1 می‌شود)
+    with torch.no_grad():
+        ch_mean = x.mean(dim=-1)     # (C,)
+        ch_std  = x.std(dim=-1)      # (C,)
+    print(f"[{name}] per-channel mean:", ch_mean.cpu().numpy().round(4))
+    print(f"[{name}] per-channel std :", ch_std.cpu().numpy().round(4))
+
+    # نبود NaN/Inf
+    assert torch.isfinite(x).all(), f"[{name}] x has NaN/Inf"
+    print(f"[{name}] OK\n")
+
+check_one_sample(train_ds, "train_ds")
+check_one_sample(val_ds,   "val_ds")
+
+# ---------- 2) یک مینی‌بچ از هر DataLoader ----------
+def check_one_batch(loader, name="loader", device=None, model=None):
+    xb, yb = next(iter(loader))
+    print(f"[{name}] batch x:", tuple(xb.shape), xb.dtype, "| y:", tuple(yb.shape), yb.dtype)
+    print(f"[{name}] unique labels in batch:", torch.unique(yb).tolist())
+
+    # checks پایه
+    assert xb.ndim == 3, f"[{name}] expected x shape [B,C,T], got {xb.shape}"
+    assert yb.ndim == 1, f"[{name}] expected y shape [B], got {yb.shape}"
+    assert torch.isfinite(xb).all(), f"[{name}] xb has NaN/Inf"
+    assert (yb >= 0).all(), f"[{name}] negative labels?"
+    print(f"[{name}] basic checks: OK")
+
+    # انتقال به دیوایس و یک forward اختیاری
+    if device is None:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    xb = xb.to(device, non_blocking=True)
+    yb = yb.to(device, non_blocking=True)
+
+    if model is not None:
+        model.eval()
+        with torch.no_grad():
+            logits = model(xb)  # باید [B, n_classes] باشد
+        print(f"[{name}] model logits shape:", tuple(logits.shape))
+        # یک loss تستی (اختیاری)
+        if logits.ndim == 2 and logits.size(0) == yb.size(0):
+            loss = torch.nn.functional.cross_entropy(logits, yb)
+            print(f"[{name}] CE loss:", float(loss.item()))
+    print()
+
+check_one_batch(train_loader, "train_loader", device=None, model= None)
+check_one_batch(val_loader,   "val_loader",   device=None, model= None)
+
+
+
+
+
+
+
+
+
+"""
 
 '''
 ====================================================================
@@ -465,3 +617,7 @@ for epoch in tqdm(range(EPOCHES)):
           f"| train loss: {train_loss:.4f}, train acc: {train_acc:.3f} "
           f"| val loss: {val_loss:.4f}, val acc: {val_acc:.3f}")
 '''
+
+
+
+"""

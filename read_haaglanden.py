@@ -74,10 +74,9 @@ def read_data_haaglanden(
     # پیش‌اختصاص و پر کردن سریع
     X = np.empty((n, C, win), dtype=np.float32)
     for j, s in enumerate(starts):
-        try :
-            X[j] = data_x[:, s:s+win]
-        except:
-            print('window size is not 32')
+     
+        X[j] = data_x[:, s:s+win]
+       
 
     y = labels
     start_idx  = starts.astype(np.int32)
