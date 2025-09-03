@@ -17,6 +17,9 @@ SEC = 32
 BATCH_SIZE = 128  *4
 NUM_WORKERS = 20
 
+dir_save_modeles = input('dir for save modeles : ')
+
+
 '''
 ====================================================================
                             Create dataset
@@ -520,6 +523,9 @@ list_loss_funciton = [loss_function1,
                       loss_function5,
                       loss_function6,
                       loss_function7]
+
+
+history = []
 for epoch in tqdm(range(EPOCHES)):
     # ------------------------------
     # Train
@@ -601,3 +607,14 @@ for epoch in tqdm(range(EPOCHES)):
         print(f"Epoch {epoch+1}/{EPOCHES} "
             f"| train loss: {train_loss[i4]:.4f}, train acc: {train_acc[i4]:.3f} "
             f"| val loss: {val_loss[i4]:.4f}, val acc: {val_acc[i4]:.3f}")
+        history.append((train_loss[i4],train_acc[i4],val_loss[i4],val_acc[i4]))
+    s = 0
+    for model in list_modeles:
+        # save
+        s += 1
+        torch.save(model.state_dict(), f"{dir_save_modeles}/model_{s}_weights_epoch{epoch}.pth")
+
+import pickle
+# سیو
+with open(f"{dir_save_modeles}/my_dict.pkl", "wb") as f:
+    pickle.dump(history, f)
