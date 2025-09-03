@@ -521,7 +521,7 @@ for epoch in tqdm(range(EPOCHES)):
     # ------------------------------
     # Train
     # ------------------------------
-    model.train()
+   
     
     total_loss_list, correct_list, total_list = [0.0 for i in range(len(list_modeles))], [0.0 for i in range(len(list_modeles))], [0.0 for i in range(len(list_modeles))]
     
@@ -534,6 +534,7 @@ for epoch in tqdm(range(EPOCHES)):
             total_loss = total_loss_list[i1]
             correct = correct_list[i1]
             total = total_list[i1]
+            model.train()
             optimizer.zero_grad()
             logits = model(xb)                     # [B, n_classes]
             loss = loss_function(logits, yb)       # CrossEntropy
@@ -559,7 +560,7 @@ for epoch in tqdm(range(EPOCHES)):
     # ------------------------------
     # Validation
     # ------------------------------
-    model.eval()
+    
     val_loss_list, val_correct_list, val_total_list = [0.0 for i in range(len(list_modeles))], [0.0 for i in range(len(list_modeles))], [0.0 for i in range(len(list_modeles))]
     with torch.no_grad():
         for xb, yb in tqdm(val_loader, desc=f"Epoch {epoch+1}/{EPOCHES} [val]"):
@@ -570,6 +571,7 @@ for epoch in tqdm(range(EPOCHES)):
                 val_correct = val_correct_list[i3]
                 val_total = val_total_list[i3]
                 val_loss = val_loss_list[i3]
+                model.eval()
                 logits = model(xb)
                 loss = loss_function(logits, yb)
 
