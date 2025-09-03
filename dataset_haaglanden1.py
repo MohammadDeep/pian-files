@@ -13,7 +13,7 @@ X_all, y_all, subj_all, start_all = [], [], [], []
 for i in tqdm(range(63,(63 + len(files)))):
     f = files[i]
     d = np.load(f)
-    #X_all.append(d["X"].astype(np.float32))
+    X_all.append(d["X"].astype(np.float32))
     y_all.append(d["y"].astype(np.int64))
     #subj_all.append(d["subject_id"])
     #start_all.append(d["start_idx"])
