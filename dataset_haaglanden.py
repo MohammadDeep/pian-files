@@ -547,13 +547,13 @@ for epoch in tqdm(range(EPOCHES)):
             preds = logits.argmax(dim=1)
             labels = yb  # one-hot → index
             correct += (preds == labels).sum().item()
-
+            print(yb.size, yb.size(0))
             total += yb.size(0)
     train_loss, train_acc = [] ,[]
-    for i in range(len(total_loss_list)):
-        total_loss = total_loss_list[i1]
-        total = total_list[i1]
-        correct = correct_list[i1]
+    for i5 in range(len(total_loss_list)):
+        total_loss = total_loss_list[i5]
+        total = total_list[i5]
+        correct = correct_list[i5]
         train_loss.append(total_loss / total)
         train_acc.append(correct / total)
 
