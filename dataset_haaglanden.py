@@ -60,11 +60,11 @@ class MultiNpzDataset(Dataset):
         x = self._z["X"][local_idx] # type: ignore
         y = int(self._z["y"][local_idx]) # type: ignore
 
+        #x = torch.from_numpy(x).to(self.dtype)
+        #y = torch.tensor(y, dtype=torch.long)
         x = torch.from_numpy(x).to(self.dtype)
-        y = torch.tensor(y, dtype=torch.long)
-       
-        y = F.one_hot(y, num_classes=5).float()
-
+        y = torch.tensor(int(self._z["y"][local_idx]), dtype=torch.long) # type: ignore
+        
         return x, y
 
 
@@ -149,6 +149,7 @@ for epoch in tqdm(range(EPOCHES)):
     # Train
     # ------------------------------
     model.train()
+    model.to(device)
     total_loss, correct, total = 0.0, 0, 0
     
     for xb, yb in tqdm(dataloader_train, desc=f"Epoch {epoch+1}/{EPOCHES} [train]"):
@@ -164,7 +165,7 @@ for epoch in tqdm(range(EPOCHES)):
         # آمار
         total_loss += loss.item() * xb.size(0)     # sum loss (وزن‌دار به اندازه batch)
         preds = logits.argmax(dim=1)
-        labels = yb.argmax(dim=1)   # one-hot → index
+        labels = yb  # one-hot → index
         correct += (preds == labels).sum().item()
 
         total += yb.size(0)
@@ -186,7 +187,7 @@ for epoch in tqdm(range(EPOCHES)):
 
             val_loss += loss.item() * xb.size(0)
             preds = logits.argmax(dim=1)
-            labels = yb.argmax(dim=1)   # one-hot → index
+            labels = yb   # one-hot → index
             val_correct += (preds == labels).sum().item()
             val_total += yb.size(0)
 
