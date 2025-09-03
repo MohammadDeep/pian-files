@@ -17,7 +17,7 @@ SEC = 32
 BATCH_SIZE = 128  *4
 NUM_WORKERS = 20
 
-dir_save_modeles = input('dir for save modeles : ')
+dir_save_modeles = '/home/asr/mohammadBalaghi/pian-files/__HISTOY_MODEL'
 
 
 '''
