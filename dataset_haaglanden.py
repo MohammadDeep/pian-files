@@ -586,10 +586,10 @@ for epoch in tqdm(range(EPOCHES)):
  
 
     val_loss, val_acc = [] ,[]
-    for i in range(len(total_loss_list)):
-        total_loss = val_loss_list[i1]
-        total = val_total_list[i1]
-        correct = val_correct_list[i1]
+    for i7 in range(len(total_loss_list)):
+        total_loss = val_loss_list[i7]
+        total = val_total_list[i7]
+        correct = val_correct_list[i7]
         val_loss.append(total_loss / total)
         val_acc.append(correct / total)
     # ------------------------------
