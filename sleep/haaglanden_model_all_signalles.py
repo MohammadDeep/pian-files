@@ -38,6 +38,12 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader, WeightedRandomSampler, Subset
 
+
+
+from pathlib import Path
+save_dir = Path(dir_save_modeles)
+save_dir.mkdir(parents=True, exist_ok=True)
+
 class ShardedNPYDataset(Dataset):
     """
     شاردها را مثل X_000.npy / y_000.npy می‌خواند (X: [N, C, T], y: [N]).

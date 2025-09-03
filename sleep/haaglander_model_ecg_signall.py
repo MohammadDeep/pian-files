@@ -42,6 +42,13 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader, WeightedRandomSampler, Subset
 
+
+
+from pathlib import Path
+save_dir = Path(dir_save_modeles)
+save_dir.mkdir(parents=True, exist_ok=True)
+
+
 class ShardedNPYDataset(Dataset):
     def __init__(self, root_dir,
                  x_pattern="X_*.npy",
@@ -624,6 +631,7 @@ for epoch in tqdm(range(EPOCHES)):
     for model in list_modeles:
         # save
         s += 1
+
         torch.save(model.state_dict(), f"{dir_save_modeles}/model_{s}_weights_epoch{epoch}.pth")
 
 import pickle
