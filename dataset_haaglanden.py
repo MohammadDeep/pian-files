@@ -23,8 +23,9 @@ import torch
 from torch.utils.data import Dataset
 import torch.nn.functional as F
 class MultiNpzDataset(Dataset):
-    def __init__(self, files, mmap=True, dtype=torch.float32):
+    def __init__(self, files,files_y, mmap=True, dtype=torch.float32):
         self.files = files
+        self.files_y = files_y
         self.mmap = mmap
         self.dtype = dtype
 
@@ -46,7 +47,8 @@ class MultiNpzDataset(Dataset):
 
     def _open_file(self, idx_file):
         if self._current_file != idx_file:
-            self._z = np.load(self.files[idx_file], mmap_mode="r" if self.mmap else None)
+            self._x = np.load(self.files[idx_file], mmap_mode="r" if self.mmap else None)
+            self._y = np.load(self.files_y[idx_file], mmap_mode="r" if self.mmap else None)
             self._current_file = idx_file
 
     def __getitem__(self, idx):
@@ -57,8 +59,8 @@ class MultiNpzDataset(Dataset):
 
         self._open_file(idx_file)
 
-        x = self._z["X"][local_idx] # type: ignore
-        y = int(self._z["y"][local_idx]) # type: ignore
+        x = self._x["X"][local_idx] # type: ignore
+        y = int(self._y["y"][local_idx]) # type: ignore
 
         #x = torch.from_numpy(x).to(self.dtype)
         #y = torch.tensor(y, dtype=torch.long)
@@ -72,12 +74,16 @@ from torch.utils.data import DataLoader
 files = [f for f in os.listdir(folder) if f.endswith(".npz")]
 print(files)
 print(len(files))
-files =[f'{folder}/{f}' for f in files]
-file_val = files[:20]
-file_train = files[20:]
+
+files =[f"/home/asr/mohammadBalaghi/dataset_signal/newdatahaag1/x_all_end{i}.npy" for i in [21, 42 , 63, 84]]
+files_y =[f"/home/asr/mohammadBalaghi/dataset_signal/newdatahaag1/y_all_end{i}.npy" for i in [21, 42 , 63, 84]]
+file_val = files[:1]
+file_val_y = files_y[:1]
+file_train = files[1:]
+file_train_y = files_y[1:]
 print('start create dataset')
-dataset_train = MultiNpzDataset(file_train)
-dataset_val = MultiNpzDataset(file_val)
+dataset_train = MultiNpzDataset(file_train, file_train_y)
+dataset_val = MultiNpzDataset(file_val,file_val_y)
 x1, y1 = dataset_train[0]
 print('data shape : ', x1.shape)
 print('y shape', y1)
