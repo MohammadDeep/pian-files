@@ -203,62 +203,6 @@ val_loader = DataLoader(val_ds, batch_size=BATCH_SIZE,
 
 
 
-############################
-import torch
-import numpy as np
-
-# ---------- 1) نمونهٔ مستقیم از Dataset (قبل از DataLoader) ----------
-def check_one_sample(ds, name="dataset"):
-    x, y = ds[0]     # یک نمونه
-    print(f"[{name}] sample x shape:", tuple(x.shape), "| dtype:", x.dtype)
-    print(f"[{name}] sample y:", int(y), "| dtype:", y.dtype)
-
-    # نرمال‌سازی درست؟ (اگر normalize انجام شده، میانگین نزدیک 0 و std نزدیک 1 می‌شود)
-    with torch.no_grad():
-        ch_mean = x.mean(dim=-1)     # (C,)
-        ch_std  = x.std(dim=-1)      # (C,)
-    print(f"[{name}] per-channel mean:", ch_mean.cpu().numpy().round(4))
-    print(f"[{name}] per-channel std :", ch_std.cpu().numpy().round(4))
-
-    # نبود NaN/Inf
-    assert torch.isfinite(x).all(), f"[{name}] x has NaN/Inf"
-    print(f"[{name}] OK\n")
-
-check_one_sample(train_ds, "train_ds")
-check_one_sample(val_ds,   "val_ds")
-
-# ---------- 2) یک مینی‌بچ از هر DataLoader ----------
-def check_one_batch(loader, name="loader", device=None, model=None):
-    xb, yb = next(iter(loader))
-    print(f"[{name}] batch x:", tuple(xb.shape), xb.dtype, "| y:", tuple(yb.shape), yb.dtype)
-    print(f"[{name}] unique labels in batch:", torch.unique(yb).tolist())
-
-    # checks پایه
-    assert xb.ndim == 3, f"[{name}] expected x shape [B,C,T], got {xb.shape}"
-    assert yb.ndim == 1, f"[{name}] expected y shape [B], got {yb.shape}"
-    assert torch.isfinite(xb).all(), f"[{name}] xb has NaN/Inf"
-    assert (yb >= 0).all(), f"[{name}] negative labels?"
-    print(f"[{name}] basic checks: OK")
-
-    # انتقال به دیوایس و یک forward اختیاری
-    if device is None:
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    xb = xb.to(device, non_blocking=True)
-    yb = yb.to(device, non_blocking=True)
-
-    if model is not None:
-        model.eval()
-        with torch.no_grad():
-            logits = model(xb)  # باید [B, n_classes] باشد
-        print(f"[{name}] model logits shape:", tuple(logits.shape))
-        # یک loss تستی (اختیاری)
-        if logits.ndim == 2 and logits.size(0) == yb.size(0):
-            loss = torch.nn.functional.cross_entropy(logits, yb)
-            print(f"[{name}] CE loss:", float(loss.item()))
-    print()
-
-check_one_batch(train_loader, "train_loader", device=None, model= None)
-check_one_batch(val_loader,   "val_loader",   device=None, model= None)
 
 
 
@@ -267,8 +211,6 @@ check_one_batch(val_loader,   "val_loader",   device=None, model= None)
 
 
 
-
-"""
 
 '''
 ====================================================================
@@ -559,65 +501,100 @@ model7.to(device)
 
 from tqdm import tqdm
 import torch
-'''
+list_modeles = [model1, model2, model3, model4, model5, model6, model7]
+list_optimzers = [optimizer1,
+                   optimizer2,
+                   optimizer3,
+                   optimizer4,
+                   optimizer5,
+                   optimizer6,
+                   optimizer7
+                   ]
+list_loss_funciton = [loss_function1,
+                      loss_function2,
+                      loss_function3,
+                      loss_function4,
+                      loss_function5,
+                      loss_function6,
+                      loss_function7]
 for epoch in tqdm(range(EPOCHES)):
     # ------------------------------
     # Train
     # ------------------------------
     model.train()
-    model.to(device)
-    total_loss, correct, total = 0.0, 0, 0
     
-    for xb, yb in tqdm(dataloader_train, desc=f"Epoch {epoch+1}/{EPOCHES} [train]"):
+    total_loss_list, correct_list, total_list = [0.0 for i in range(len(list_modeles))], [0.0 for i in range(len(list_modeles))], [0.0 for i in range(len(list_modeles))]
+    
+    for xb, yb in tqdm(train_loader, desc=f"Epoch {epoch+1}/{EPOCHES} [train]"):
         xb, yb = xb.to(device), yb.to(device)
+        for i1 in range(len(list_modeles)):
+            model = list_modeles[i1]
+            optimizer = list_optimzers[i1]
+            loss_function = list_loss_funciton[i1]
+            total_loss = total_loss_list[i1]
+            correct = correct_list[i1]
+            total = total_list[i1]
+            optimizer.zero_grad()
+            logits = model(xb)                     # [B, n_classes]
+            loss = loss_function(logits, yb)       # CrossEntropy
 
-        optimizer.zero_grad()
-        logits = model(xb)                     # [B, n_classes]
-        loss = loss_function(logits, yb)       # CrossEntropy
+            loss.backward()
+            optimizer.step()
 
-        loss.backward()
-        optimizer.step()
+            # آمار
+            total_loss += loss.item() * xb.size(0)     # sum loss (وزن‌دار به اندازه batch)
+            preds = logits.argmax(dim=1)
+            labels = yb  # one-hot → index
+            correct += (preds == labels).sum().item()
 
-        # آمار
-        total_loss += loss.item() * xb.size(0)     # sum loss (وزن‌دار به اندازه batch)
-        preds = logits.argmax(dim=1)
-        labels = yb  # one-hot → index
-        correct += (preds == labels).sum().item()
-
-        total += yb.size(0)
-
-    train_loss = total_loss / total
-    train_acc = correct / total
+            total += yb.size(0)
+    train_loss, train_acc = [] ,[]
+    for i in range(len(total_loss_list)):
+        total_loss = total_loss_list[i1]
+        total = total_list[i1]
+        correct = correct_list[i1]
+        train_loss.append(total_loss / total)
+        train_acc.append(correct / total)
 
     # ------------------------------
     # Validation
     # ------------------------------
     model.eval()
-    val_loss, val_correct, val_total = 0.0, 0, 0
+    val_loss_list, val_correct_list, val_total_list = [0.0 for i in range(len(list_modeles))], [0.0 for i in range(len(list_modeles))], [0.0 for i in range(len(list_modeles))]
     with torch.no_grad():
-        for xb, yb in tqdm(dataloader_val, desc=f"Epoch {epoch+1}/{EPOCHES} [val]"):
+        for xb, yb in tqdm(val_loader, desc=f"Epoch {epoch+1}/{EPOCHES} [val]"):
             xb, yb = xb.to(device), yb.to(device)
+            for i3 in range(len(list_modeles)):
+                model = list_modeles[i3]
+                loss_function = list_loss_funciton[i3]
+                val_correct = val_correct_list[i3]
+                val_total = val_total_list[i3]
+                val_loss = val_loss_list[i3]
+                logits = model(xb)
+                loss = loss_function(logits, yb)
 
-            logits = model(xb)
-            loss = loss_function(logits, yb)
-
-            val_loss += loss.item() * xb.size(0)
-            preds = logits.argmax(dim=1)
-            labels = yb   # one-hot → index
-            val_correct += (preds == labels).sum().item()
-            val_total += yb.size(0)
+                val_loss += loss.item() * xb.size(0)
+                preds = logits.argmax(dim=1)
+                labels = yb   # one-hot → index
+                val_correct += (preds == labels).sum().item()
+                val_total += yb.size(0)
 
     val_loss /= val_total
     val_acc = val_correct / val_total
 
+    val_loss, val_acc = [] ,[]
+    for i in range(len(total_loss_list)):
+        total_loss = val_loss_list[i1]
+        total = val_total_list[i1]
+        correct = val_correct_list[i1]
+        val_loss.append(total_loss / total)
+        val_acc.append(correct / total)
     # ------------------------------
     # Print summary
     # ------------------------------
-    print(f"Epoch {epoch+1}/{EPOCHES} "
-          f"| train loss: {train_loss:.4f}, train acc: {train_acc:.3f} "
-          f"| val loss: {val_loss:.4f}, val acc: {val_acc:.3f}")
-'''
-
-
-
-"""
+    for i4 in range(len(val_acc)):
+        print('-' * 50)
+        print(f'model : {i4 + 1}')
+        print(f"Epoch {epoch+1}/{EPOCHES} "
+            f"| train loss: {train_loss[i4]:.4f}, train acc: {train_acc[i4]:.3f} "
+            f"| val loss: {val_loss[i4]:.4f}, val acc: {val_acc[i4]:.3f}")
