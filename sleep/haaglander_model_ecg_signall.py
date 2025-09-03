@@ -176,7 +176,8 @@ full_ds = ShardedNPYDataset(root_dir, normalize=stats, channel_idx = SELECTED_CH
 n_total = len(full_ds)
 n_train = int(0.8 * n_total)
 n_val   = n_total - n_train
-train_ds, val_ds = random_split(full_ds, [n_train, n_val], generator=torch.Generator().manual_seed(42))
+train_ds, val_ds = full_ds[:n_train], full_ds[n_train:]
+
 
 # (اختیاری) وزن کلاس‌ها و WeightedRandomSampler برای دیتاست train
 # ابتدا شمارش کلاس‌ها:
