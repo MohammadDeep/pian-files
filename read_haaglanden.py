@@ -74,7 +74,10 @@ def read_data_haaglanden(
     # پیش‌اختصاص و پر کردن سریع
     X = np.empty((n, C, win), dtype=np.float32)
     for j, s in enumerate(starts):
-        X[j] = data_x[:, s:s+win]
+        try :
+            X[j] = data_x[:, s:s+win]
+        except:
+            print('window size is not 32')
 
     y = labels
     start_idx  = starts.astype(np.int32)
@@ -105,7 +108,7 @@ fs = 256
 X_buf, y_buf = [], []
 shard_id = 0
 
-for number_persion in range(75, persion+1):
+for number_persion in range( persion+1):
     print('-'*50, number_persion)
     try:
         out = read_data_haaglanden(
