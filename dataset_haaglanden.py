@@ -572,9 +572,7 @@ for epoch in tqdm(range(EPOCHES)):
             for i3 in range(len(list_modeles)):
                 model = list_modeles[i3]
                 loss_function = list_loss_funciton[i3]
-                val_correct = val_correct_list[i3]
-                val_total = val_total_list[i3]
-                val_loss = val_loss_list[i3]
+
                 model.eval()
                 logits = model(xb)
                 loss = loss_function(logits, yb)
@@ -585,8 +583,7 @@ for epoch in tqdm(range(EPOCHES)):
                 val_correct_list[i3] += (preds == labels).sum().item()
                 val_total_list[i3] += yb.size(0)
 
-    val_loss /= val_total
-    val_acc = val_correct / val_total
+ 
 
     val_loss, val_acc = [] ,[]
     for i in range(len(total_loss_list)):
