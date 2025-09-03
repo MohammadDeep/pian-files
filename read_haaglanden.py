@@ -105,7 +105,7 @@ fs = 256
 X_buf, y_buf = [], []
 shard_id = 0
 
-for number_persion in range(1, persion+1):
+for number_persion in range(75, persion+1):
     print('-'*50, number_persion)
     try:
         out = read_data_haaglanden(
