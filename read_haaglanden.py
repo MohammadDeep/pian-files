@@ -109,7 +109,7 @@ fs = 256
 import numpy as np
 import mne
 
-persion = 1
+persion = 154
 X_data, Y_data = [] , []
 # X: [N, C, T]   y: [N]   meta: هرچه لازم داری (مثلاً subject_id, start_idx)
 for i in range(persion):
