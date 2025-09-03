@@ -31,9 +31,9 @@ class MultiNpzDataset(Dataset):
 
         # لیست طول هر فایل (برای mapping ایندکس کلی → فایل محلی)
         self.file_lengths = []
-        for f in self.files:
+        for f in self.files_y:
             with np.load(f, mmap_mode="r" if mmap else None) as d:
-                self.file_lengths.append(d["y"].shape[0])
+                self.file_lengths.append(d.shape[0])
 
         self.cum_lengths = np.cumsum(self.file_lengths)
         self.N = self.cum_lengths[-1]
