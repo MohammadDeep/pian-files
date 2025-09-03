@@ -75,7 +75,7 @@ files = [f for f in os.listdir(folder) if f.endswith(".npz")]
 print(files)
 print(len(files))
 
-files =[f"/home/asr/mohammadBalaghi/dataset_signal/newdatahaag1/x_all_end{i}.npy" for i in [21, 42 , 63, 84]]
+files =[f"/home/asr/mohammadBalaghi/dataset_signal/newdatahaag1/X_all_end{i}.npy" for i in [21, 42 , 63, 84]]
 files_y =[f"/home/asr/mohammadBalaghi/dataset_signal/newdatahaag1/y_all_end{i}.npy" for i in [21, 42 , 63, 84]]
 file_val = files[:1]
 file_val_y = files_y[:1]
