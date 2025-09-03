@@ -8,7 +8,11 @@ folder = "/home/asr/mohammadBalaghi/dataset_signal/newdatahaag"
 EPOCHES = 100
 
 dir_history_model = '/home/asr/mohammadBalaghi/pian-files/__HISTORY_MODEL'
+N_CLASSES = 5
+IN_CH = 8
 
+NH_LISTM = 128
+SEC = 32
 
 '''
 ====================================================================
@@ -22,6 +26,7 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 import torch.nn.functional as F
+
 class MultiNpzDataset(Dataset):
     def __init__(self, files,files_y, mmap=True, dtype=torch.float32):
         self.files = files
@@ -72,7 +77,7 @@ class MultiNpzDataset(Dataset):
         
         return x, y
 
-
+'''
 from torch.utils.data import DataLoader
 files = [f for f in os.listdir(folder) if f.endswith(".npz")]
 print(files)
@@ -109,7 +114,7 @@ dataloader_val = DataLoader(
 for xb, yb in dataset_train:
     print(xb.shape, yb.shape)
     break
-
+'''
 
 
 
@@ -119,40 +124,290 @@ for xb, yb in dataset_train:
 ====================================================================                            
 '''
 
-from pre_modeles.pre_modeles.t_model import SimpleResNet,CNN_LSTM_Model,BasicBlock,CNN_LSTM_Model,LSTM_Model
+from pre_modeles.pre_modeles.t_model import SimpleResNet,CNN_LSTM_Model,BasicBlock,CNN_LSTM_Model,LSTM_Model,CNN_LSTM_Model1,SimpleResNet1,CNN_LSTM_Model2,SimpleResNet2
+
+
+'''
+====================================================================
+                            modele1
+====================================================================                            
+'''
+print('-' * 50)
+print('model1 : ')
+
 '''
 start lne  = 2 * 256
 step  = 2 * 256
 '''
-net1 = SimpleResNet(BasicBlock, layers=[1,1,1,2,2],list_step = [2,2,2,1,1], in_ch=8, base_planes=16)
+net1 = SimpleResNet(BasicBlock, layers=[1,1,1,2,2],list_step = [2,2,2,1,1], in_ch=IN_CH, base_planes=16)
 lstm1 = LSTM_Model(input_size = 256,
-                    hidden_size = 128,
+                    hidden_size = NH_LISTM,
                     num_layers = 2, 
-                    num_classes = 5)
-model = CNN_LSTM_Model(net1, lstm1)
+                    num_classes = N_CLASSES)
+model1 = CNN_LSTM_Model(net1, lstm1)
 
 
-N = 30  * 256
+N = SEC  * 256
 # ورودی به مدل باید یک تنسور باشد
-dummy_input = torch.randn(32, 8, N)  # [batch_size, channels, sequence_length]
+dummy_input = torch.randn(32, IN_CH, N)  # [batch_size, channels, sequence_length]
 with torch.no_grad():
-    output = model(dummy_input)
+    output = model1(dummy_input)
 print(output.size())
 
 from torchinfo import summary
-summary(model, input_size=(32, 8, N)) 
+summary(model1, input_size=(32, IN_CH, N)) 
 
  
 from vision.train_val_functiones.train_val_functiones import train
 import torch.nn as nn
-loss_function = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-4)
+loss_function1 = nn.CrossEntropyLoss()
+optimizer1 = torch.optim.Adam(model1.parameters(), lr=1e-3, weight_decay=1e-4)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using device:", device)
+model1.to(device)
+
+
+
+'''
+====================================================================
+                            modele2
+====================================================================                            
+'''
+print('-' * 50)
+print('model2 : ')
+
+'''
+start lne  = 1 * 256
+step  = 1 * 256
+'''
+net2 = SimpleResNet(BasicBlock, layers=[1,1,1,2,2],list_step = [2,2,1,1,1], in_ch=IN_CH, base_planes=16)
+lstm2 = LSTM_Model(input_size = 256,
+                hidden_size = NH_LISTM,
+                    num_layers = 2, 
+                    num_classes = N_CLASSES)
+model2 = CNN_LSTM_Model(net2, lstm2)
+
+
+N = SEC  * 256
+# ورودی به مدل باید یک تنسور باشد
+dummy_input = torch.randn(32, IN_CH, N)  # [batch_size, channels, sequence_length]
+with torch.no_grad():
+    output = model2(dummy_input)
+print(output.size())
+
+from torchinfo import summary
+summary(model2, input_size=(32, IN_CH, N)) 
+
+ 
+from vision.train_val_functiones.train_val_functiones import train
+import torch.nn as nn
+loss_function2 = nn.CrossEntropyLoss()
+optimizer2 = torch.optim.Adam(model2.parameters(), lr=1e-3, weight_decay=1e-4)
+model2.to(device)
+
+
+
+'''
+====================================================================
+                            modele3
+====================================================================                            
+'''
+print('-' * 50)
+print('model3 : ')
+
+'''
+start lne  = .5 * 256
+step  = .5 * 256
+'''
+net3 = SimpleResNet(BasicBlock, layers=[1,1,1,2,2],list_step = [2,1,1,1,1], in_ch=IN_CH, base_planes=16)
+lstm3 = LSTM_Model(input_size = 256,
+                hidden_size = NH_LISTM,
+                    num_layers = 2, 
+                    num_classes = N_CLASSES)
+model3 = CNN_LSTM_Model(net3, lstm3)
+
+
+N = SEC  * 256
+# ورودی به مدل باید یک تنسور باشد
+dummy_input = torch.randn(32, IN_CH, N)  # [batch_size, channels, sequence_length]
+with torch.no_grad():
+    output = model3(dummy_input)
+print(output.size())
+
+from torchinfo import summary
+summary(model3, input_size=(32, IN_CH, N)) 
+
+ 
+from vision.train_val_functiones.train_val_functiones import train
+import torch.nn as nn
+loss_function3 = nn.CrossEntropyLoss()
+optimizer3 = torch.optim.Adam(model3.parameters(), lr=1e-3, weight_decay=1e-4)
+model3.to(device)
+
+
+'''
+====================================================================
+                            modele4
+====================================================================                            
+'''
+print('-' * 50)
+print('model4 : ')
+
+'''
+start lne  = 1 * 256
+step  = 1 * 256
+'''
+
+net4 = SimpleResNet1(BasicBlock, layers=[1,1,1,2,2,2,2],list_step = [2,1,1,1,1,1,1], in_ch=IN_CH, base_planes=4)
+lstm4 = LSTM_Model(input_size = 256,
+                hidden_size = NH_LISTM,
+                    num_layers = 2, 
+                    num_classes = N_CLASSES)
+model4 = CNN_LSTM_Model1(net4, lstm4)
+
+
+N = SEC  * 256
+# ورودی به مدل باید یک تنسور باشد
+dummy_input = torch.randn(32, IN_CH, N)  # [batch_size, channels, sequence_length]
+with torch.no_grad():
+    output = model4(dummy_input)
+print(output.size())
+
+from torchinfo import summary
+summary(model4, input_size=(32, IN_CH, N)) 
+
+ 
+from vision.train_val_functiones.train_val_functiones import train
+import torch.nn as nn
+loss_function4 = nn.CrossEntropyLoss()
+optimizer4 = torch.optim.Adam(model4.parameters(), lr=1e-3, weight_decay=1e-4)
+model4.to(device)
+
+
+'''
+====================================================================
+                            modele5
+====================================================================                            
+'''
+print('-' * 50)
+print('model5 : ')
+
+
+'''
+start lne  = 4 * 256
+step  = 4 * 256
+'''
+net5 = SimpleResNet1(BasicBlock, layers=[2,2,2,2,2,2,2],list_step = [2,2,1,1,1,1,1], in_ch=IN_CH, base_planes=4)
+lstm5 = LSTM_Model(input_size = 256,
+                hidden_size = NH_LISTM,
+                    num_layers = 2, 
+                    num_classes = N_CLASSES)
+model5 = CNN_LSTM_Model1(net5, lstm5)
+
+
+N = SEC * 256
+# ورودی به مدل باید یک تنسور باشد
+dummy_input = torch.randn(32, IN_CH, N)  # [batch_size, channels, sequence_length]
+with torch.no_grad():
+    output = model5(dummy_input)
+print(output.size())
+
+from torchinfo import summary
+summary(model5, input_size=(32, IN_CH, N)) 
+
+ 
+from vision.train_val_functiones.train_val_functiones import train
+import torch.nn as nn
+loss_function5 = nn.CrossEntropyLoss()
+optimizer5 = torch.optim.Adam(model5.parameters(), lr=1e-3, weight_decay=1e-4)
+model5.to(device)
+
+
+
+
+'''
+====================================================================
+                            modele6
+====================================================================                            
+'''
+print('-' * 50)
+print('model5 : ')
+
+'''
+start lne  = 2* 256
+step  = 2 * 256
+'''
+net6 = SimpleResNet1(BasicBlock, layers=[2,2,2,2,2,2,2],list_step = [2,1,1,1,1,1,1], in_ch=IN_CH, base_planes=4)
+lstm6 = LSTM_Model(input_size = 256,
+                hidden_size = NH_LISTM,
+                    num_layers = 2, 
+                    num_classes = N_CLASSES)
+model6 = CNN_LSTM_Model1(net6, lstm6)
+
+
+N = SEC  * 256
+# ورودی به مدل باید یک تنسور باشد
+dummy_input = torch.randn(32, IN_CH, N)  # [batch_size, channels, sequence_length]
+with torch.no_grad():
+    output = model6(dummy_input)
+print(output.size())
+
+from torchinfo import summary
+summary(model6, input_size=(32, IN_CH, N)) 
+
+ 
+from vision.train_val_functiones.train_val_functiones import train
+import torch.nn as nn
+loss_function6 = nn.CrossEntropyLoss()
+optimizer6 = torch.optim.Adam(model6.parameters(), lr=1e-3, weight_decay=1e-4)
+model6.to(device)
+
+
+
+
+
+'''
+====================================================================
+                            modele7
+====================================================================                            
+'''
+print('-' * 50)
+print('model7 : ')
+'''
+start lne  =   256//32
+step  = 256//32
+'''
+net7 = SimpleResNet2(BasicBlock, layers=[1,1,1,1,1,1,1,1,1,1,1,1],list_step = [2,2,1,1,1,1,1,1,1,1,1], in_ch=IN_CH, base_planes=4) 
+lstm7 = LSTM_Model(input_size = 64,
+                hidden_size = NH_LISTM,
+                    num_layers = 2, 
+                    num_classes = N_CLASSES)
+model7 = CNN_LSTM_Model2(net7, lstm7)
+
+
+
+N = SEC * 256
+# ورودی به مدل باید یک تنسور باشد
+dummy_input = torch.randn(32, IN_CH, N)  # [batch_size, channels, sequence_length]
+with torch.no_grad():
+    output = model7(dummy_input)
+print(output.size())
+
+from torchinfo import summary
+summary(model7, input_size=(32, IN_CH, N)) 
+
+ 
+from vision.train_val_functiones.train_val_functiones import train
+import torch.nn as nn
+loss_function7 = nn.CrossEntropyLoss()
+optimizer7 = torch.optim.Adam(model7.parameters(), lr=1e-3, weight_decay=1e-4)
+model7.to(device)
+
+
 
 from tqdm import tqdm
 import torch
-
+'''
 for epoch in tqdm(range(EPOCHES)):
     # ------------------------------
     # Train
@@ -209,3 +464,4 @@ for epoch in tqdm(range(EPOCHES)):
     print(f"Epoch {epoch+1}/{EPOCHES} "
           f"| train loss: {train_loss:.4f}, train acc: {train_acc:.3f} "
           f"| val loss: {val_loss:.4f}, val acc: {val_acc:.3f}")
+'''
