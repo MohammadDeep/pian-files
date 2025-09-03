@@ -29,18 +29,18 @@ class MultiNpzDataset(Dataset):
         self.mmap = mmap
         self.dtype = dtype
 
-        # لیست طول هر فایل (برای mapping ایندکس کلی → فایل محلی)
+        '''# لیست طول هر فایل (برای mapping ایندکس کلی → فایل محلی)
         self.file_lengths = []
         for f in self.files_y:
             d = np.load(f)                      # mmap_mode نگذار؛ روی npz فشرده اثری ندارد
             self.file_lengths.append(d.shape[0])
             if hasattr(d, "close"):
                 d.close()
-
-
+        '''
+        '''
         self.cum_lengths = np.cumsum(self.file_lengths)
         self.N = self.cum_lengths[-1]
-
+        '''
         # کش برای فایل جاری
         self._z = None
         self._current_file = None
