@@ -160,19 +160,17 @@ def compute_channel_stats(root_dir, x_pattern="X_*.npy", eps=1e-12):
 
 from torch.utils.data import random_split
 
-root_dir = "/home/asr/mohammadBalaghi/dataset_signal/newdatahaag1"
+root_dir = "/home/asr/mohammadBalaghi/dataset_signal/newdatahaag1/train"
+root_dir_val = "/home/asr/mohammadBalaghi/dataset_signal/newdatahaag1/val"
 
 # (اختیاری) یک بار محاسبه و ذخیره کن، بعداً همان را استفاده کن:
 stats = compute_channel_stats(root_dir)
 print("stats:", stats)  # {'mean': [...], 'std': [...]}
 
-full_ds = ShardedNPYDataset(root_dir, normalize=stats)
+train_ds= ShardedNPYDataset(root_dir, normalize=stats)
+val_ds= ShardedNPYDataset(root_dir_val, normalize=stats)
 
-# اسپلیتِ ساده (۸۰/۲۰)
-n_total = len(full_ds)
-n_train = int(0.8 * n_total)
-n_val   = n_total - n_train
-train_ds, val_ds = full_ds[:n_train], full_ds[n_train:]
+
 
 # (اختیاری) وزن کلاس‌ها و WeightedRandomSampler برای دیتاست train
 # ابتدا شمارش کلاس‌ها:
