@@ -11,8 +11,11 @@ dir_history_model = '/home/asr/mohammadBalaghi/pian-files/__HISTORY_MODEL'
 N_CLASSES = 5
 IN_CH = 8
 
-NH_LISTM = 128
+NH_LISTM = 128 
 SEC = 32
+
+BATCH_SIZE = 128  *2
+NUM_WORKERS = 14
 
 '''
 ====================================================================
@@ -190,13 +193,13 @@ sampler = WeightedRandomSampler(weights=sample_weights,
                                 replacement=True)
 
 # DataLoader ها
-BATCH_SIZE = 128
+
 train_loader = DataLoader(train_ds, batch_size=BATCH_SIZE,
-                          sampler=sampler, num_workers=4,
+                          sampler=sampler, num_workers=NUM_WORKERS,
                           pin_memory=True, drop_last=True)
 
 val_loader = DataLoader(val_ds, batch_size=BATCH_SIZE,
-                        shuffle=False, num_workers=4,
+                        shuffle=False, num_workers=NUM_WORKERS,
                         pin_memory=True)
 
 
@@ -543,7 +546,7 @@ for epoch in tqdm(range(EPOCHES)):
             optimizer.step()
 
             # آمار
-            total_loss += loss.item() * xb.size(0)     # sum loss (وزن‌دار به اندازه batch)
+            total_loss_list[i1] += loss.item() * xb.size(0)     # sum loss (وزن‌دار به اندازه batch)
             preds = logits.argmax(dim=1)
             labels = yb  # one-hot → index
             correct_list[i1] += (preds == labels).sum().item()
