@@ -6,9 +6,9 @@ root = Path("/home/asr/mohammadBalaghi/dataset_signal/newdatahaag")   # مسیر
 #root  = Path('/media/mohammad/NewVolume/signalDataset/haaglanden-medisch-centrum-sleep-staging-database-1.1/recordings')
 
 
-dst_dir = Path('/media/mohammad/NewVolume/signalDataset/haaglanden-medisch-centrum-sleep-staging-database-1.1/new_recordings')
+dst_dir = Path('/home/asr/mohammadBalaghi/dataset_signal/newdatahaag1')
 
-n_file = 20
+n_file = 26
 
 
 import numpy as np
@@ -130,22 +130,22 @@ for i in range(persion):
                             },
             win = 32 * fs
             )
-        '''np.savez_compressed(
-        f"/home/asr/mohammadBalaghi/dataset_signal/newdatahaag/s{number_persion}.npz",
-            X=X.astype("float32"),         # کم‌حجم‌تر از float64
-            y=y.astype("int16"),
-            subject_id=subject_id.astype("int16"),
-            start_idx=start_idx.astype("int32")
-        )'''
+        np.savez_compressed(
+            f"/home/asr/mohammadBalaghi/dataset_signal/newdatahaag/s{number_persion}.npz",
+                X=X.astype("float32"),         # کم‌حجم‌تر از float64
+                y=y.astype("int16"),
+                subject_id=subject_id.astype("int16"),
+                start_idx=start_idx.astype("int32")
+            )
         X_data.append(X)
         Y_data.append(y)
 
-        '''
+        
         if number_persion % n_file == 0  or  number_persion == persion : 
-
+            
             save_shard(dst_dir, number_persion, X_data, Y_data)
             X_data, Y_data = [],[]
-            '''
+            
         
     except:
         print(f'number {number_persion} is not define.')
