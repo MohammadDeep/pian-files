@@ -2,7 +2,7 @@ from pathlib import Path
 
 
 
-#root = Path("/home/asr/mohammadBalaghi/dataset_signal/haag")   # مسیر پوشه
+root = Path("/home/asr/mohammadBalaghi/dataset_signal/haag")   # مسیر پوشه
 root  = Path('/media/mohammad/NewVolume/signalDataset/haaglanden-medisch-centrum-sleep-staging-database-1.1/recordings')
 
 
@@ -140,10 +140,12 @@ for i in range(persion):
         X_data.append(X)
         Y_data.append(y)
 
+        '''
         if number_persion % n_file == 0  or  number_persion == persion : 
 
             save_shard(dst_dir, number_persion, X_data, Y_data)
             X_data, Y_data = [],[]
+            '''
         
     except:
         print(f'number {number_persion} is not define.')
