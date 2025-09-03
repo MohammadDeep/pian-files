@@ -546,10 +546,11 @@ for epoch in tqdm(range(EPOCHES)):
             total_loss += loss.item() * xb.size(0)     # sum loss (وزن‌دار به اندازه batch)
             preds = logits.argmax(dim=1)
             labels = yb  # one-hot → index
-            correct += (preds == labels).sum().item()
+            correct_list[i1] += (preds == labels).sum().item()
             
-            total += BATCH_SIZE
+            total_list[i1] +=  yb.size(0)
     train_loss, train_acc = [] ,[]
+  
     for i5 in range(len(total_loss_list)):
         total_loss = total_loss_list[i5]
         total = total_list[i5]
@@ -575,11 +576,11 @@ for epoch in tqdm(range(EPOCHES)):
                 logits = model(xb)
                 loss = loss_function(logits, yb)
 
-                val_loss += loss.item() * xb.size(0)
+                val_loss_list[i3] += loss.item() * xb.size(0)
                 preds = logits.argmax(dim=1)
                 labels = yb   # one-hot → index
-                val_correct += (preds == labels).sum().item()
-                val_total += yb.size(0)
+                val_correct_list[i3] += (preds == labels).sum().item()
+                val_total_list[i3] += yb.size(0)
 
     val_loss /= val_total
     val_acc = val_correct / val_total
