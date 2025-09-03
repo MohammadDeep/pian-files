@@ -103,7 +103,6 @@ class SimpleResNet(nn.Module):
                  block: Type[BasicBlock],
                  layers: List[int],          # تعداد بلوک‌ها در هر stage، مثل [1,1,1] یا [2,2,2]
                  list_step:List[int],
-                 list_p ,
                  in_ch: int = 3,
                  base_planes: int = 64):
         super().__init__()
