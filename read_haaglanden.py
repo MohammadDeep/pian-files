@@ -2,7 +2,7 @@ from pathlib import Path
 
 
 
-root = Path("/home/asr/mohammadBalaghi/dataset_signal/haag")   # مسیر پوشه
+root = Path("/home/asr/mohammadBalaghi/dataset_signal/newdatahaag")   # مسیر پوشه
 #root  = Path('/media/mohammad/NewVolume/signalDataset/haaglanden-medisch-centrum-sleep-staging-database-1.1/recordings')
 
 
