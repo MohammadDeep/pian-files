@@ -547,8 +547,8 @@ for epoch in tqdm(range(EPOCHES)):
             preds = logits.argmax(dim=1)
             labels = yb  # one-hot → index
             correct += (preds == labels).sum().item()
-            print(yb.size, yb.size(0))
-            total += yb.size(0)
+            
+            total += BATCH_SIZE
     train_loss, train_acc = [] ,[]
     for i5 in range(len(total_loss_list)):
         total_loss = total_loss_list[i5]
