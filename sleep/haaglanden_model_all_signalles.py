@@ -19,6 +19,7 @@ NUM_WORKERS = 20
 
 dir_save_modeles = '/home/asr/mohammadBalaghi/pian-files/__HISTOY_MODEL'
 
+signal_names = ['EEG F4-M1', 'EEG C4-M1', 'EEG O2-M1', 'EEG C3-M2', 'EMG chin', 'EOG E1-M2', 'EOG E2-M2', 'ECG']
 
 '''
 ====================================================================
