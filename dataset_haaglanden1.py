@@ -8,9 +8,9 @@ print(len(files))
 files =[f'{folder}/{f}' for f in files]
 
 import glob
-
+from tqdm import tqdm
 X_all, y_all, subj_all, start_all = [], [], [], []
-for i in range(len(files)):
+for i in tqdm(range(len(files))):
     f = files[i]
     d = np.load(f)
     X_all.append(d["X"].astype(np.float32))
