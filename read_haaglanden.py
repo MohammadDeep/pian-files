@@ -101,14 +101,14 @@ root = Path("/home/asr/mohammadBalaghi/dataset_signal/newdatahaag")
 dst_dir = Path('/home/asr/mohammadBalaghi/dataset_signal/newdatahaag1')
 dst_dir.mkdir(parents=True, exist_ok=True)
 
-persion = 154
+persion = 126
 n_file  = 26
 fs = 256
 
 X_buf, y_buf = [], []
-shard_id = 0
 
-for number_persion in range( persion+1):
+
+for number_persion in range( 1, persion+1):
     print('-'*50, number_persion)
     try:
         out = read_data_haaglanden(
@@ -131,8 +131,8 @@ for number_persion in range( persion+1):
         y_buf.append(y)
 
         if number_persion % n_file == 0 or number_persion == persion:
-            save_shard(dst_dir, shard_id, X_buf, y_buf)
-            shard_id += 1
+            save_shard(dst_dir, number_persion, X_buf, y_buf)
+            
             X_buf, y_buf = [], []
 
     except Exception as e:
