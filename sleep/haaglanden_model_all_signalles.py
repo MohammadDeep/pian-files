@@ -229,7 +229,7 @@ val_loader = DataLoader(val_ds, batch_size=BATCH_SIZE,
 ====================================================================                            
 '''
 
-from pre_modeles.pre_modeles.t_model import SimpleResNet,CNN_LSTM_Model,BasicBlock,CNN_LSTM_Model,LSTM_Model,CNN_LSTM_Model1,SimpleResNet1,CNN_LSTM_Model2,SimpleResNet2
+from pre_modeles.t_model import SimpleResNet,CNN_LSTM_Model,BasicBlock,CNN_LSTM_Model,LSTM_Model,CNN_LSTM_Model1,SimpleResNet1,CNN_LSTM_Model2,SimpleResNet2
 
 
 '''
