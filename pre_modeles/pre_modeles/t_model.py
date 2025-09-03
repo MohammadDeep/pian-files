@@ -38,7 +38,8 @@ class BasicBlock(nn.Module):
         base_width: int = 64,
         dilation: int = 1,
         norm_layer: Optional[Callable[..., nn.Module]] = None,
-        hava_maxpool:bool = True
+        hava_maxpool:bool = True,
+        dropout_p=0.5
     ):
         super().__init__()
         if norm_layer is None:
@@ -56,6 +57,7 @@ class BasicBlock(nn.Module):
         if hava_maxpool:
             self.maxpool = nn.MaxPool1d(2)
         self.bn2   = norm_layer(planes)
+        self.drop = nn.Dropout1d(p=dropout_p) if dropout_p > 0 else nn.Identity()
 
         # مسیر میان‌بُر (skip). اگر ابعاد/استراید فرق کند، ۱×۱ می‌گذاریم
         if downsample is None and (stride != 1 or in_channels != planes * self.expansion or hava_maxpool):
@@ -84,7 +86,7 @@ class BasicBlock(nn.Module):
 
         if self.downsample is not None:
             identity = self.downsample(x)
-
+        out = self.drop(out)           # ← دارپ‌اوت بعد از BN دوم
         out += identity
         out = self.relu(out)
         return out
@@ -101,6 +103,7 @@ class SimpleResNet(nn.Module):
                  block: Type[BasicBlock],
                  layers: List[int],          # تعداد بلوک‌ها در هر stage، مثل [1,1,1] یا [2,2,2]
                  list_step:List[int],
+                 list_p ,
                  in_ch: int = 3,
                  base_planes: int = 64):
         super().__init__()
@@ -129,7 +132,8 @@ class SimpleResNet(nn.Module):
                   planes=planes,
                   stride=stride,
                   norm_layer=nn.BatchNorm1d,
-                  hava_maxpool=poolMax)       # برای پرهیز از mismatch، خاموش نگه‌دار
+                  hava_maxpool=poolMax,
+                  )       # برای پرهیز از mismatch، خاموش نگه‌دار
         )
         self.inplanes = planes * block.expansion
 
