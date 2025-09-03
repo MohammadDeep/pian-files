@@ -18,7 +18,8 @@ for i in tqdm(range(len(files))):
     subj_all.append(d["subject_id"])
     start_all.append(d["start_idx"])
 
-    if i+1 % int(len(files)//7) == 0 or i+1 == len(files):
+    if (i+1) % int(len(files)//7) == 0 or i+1 == len(files):
+        print('save file')
         X_all = np.concatenate(X_all, axis=0)
         y_all = np.concatenate(y_all, axis=0)
         subj_all = np.concatenate(subj_all, axis=0)
