@@ -17,136 +17,120 @@ import pandas as pd
 
 
 import os, glob, numpy as np
-
 def save_shard(dst_dir, shard_id, Xs, Ys):
+    # Xs, Ys ممکن است لیستِ چند آرایه باشند → اول کانکت
+    if isinstance(Xs, list):
+        Xs = np.concatenate(Xs, axis=0)
+    if isinstance(Ys, list):
+        Ys = np.concatenate(Ys, axis=0)
+
     Xs = np.ascontiguousarray(Xs, dtype=np.float32)
-    Ys = np.ascontiguousarray(Ys, dtype=np.int32)
-    
+    Ys = np.ascontiguousarray(Ys, dtype=np.int32)  # برای آموزش بعداً به torch.long تبدیل کن
+
     np.save(os.path.join(dst_dir, f"X_{shard_id:03d}.npy"), Xs)
     np.save(os.path.join(dst_dir, f"y_{shard_id:03d}.npy"), Ys)
+
 def read_data_haaglanden(
-     root:str,
-     number_persion : int = 1,
-     print_data_analez : bool = False,
+     root: Path,
+     number_persion: int = 1,
+     print_data_analez: bool = False,
      stage_map = {
-                    "Sleep stage W": 0, "W": 0,
-                    "Sleep stage N1": 1, "Sleep stage 1": 1, "N1": 1,
-                    "Sleep stage N2": 2, "Sleep stage 2": 2, "N2": 2,
-                    "Sleep stage N3": 3, "Sleep stage 3": 3, "Sleep stage 4": 3, "N3": 3,
-                    "Sleep stage R": 4, "R": 4, "REM": 4,
-                    },
-     win:int = 30
-     ):
+        "Sleep stage W": 0, "W": 0,
+        "Sleep stage N1": 1, "Sleep stage 1": 1, "N1": 1,
+        "Sleep stage N2": 2, "Sleep stage 2": 2, "N2": 2,
+        "Sleep stage N3": 3, "Sleep stage 3": 3, "Sleep stage 4": 3, "N3": 3,
+        "Sleep stage R": 4, "R": 4, "REM": 4,
+     },
+     win: int = 32 *256
+):
+    psg_file = root / f"SN{number_persion:03d}.edf"
+    raw = mne.io.read_raw_edf(psg_file, preload=True, stim_channel=None, verbose=False)
+    data_x = raw.get_data().astype(np.float32, copy=False)   # [C, T_total]
+    C, T_total = data_x.shape
 
-    psg_file = root / f"SN{number_persion:03d}.edf" # type: ignore
-    print('dir',psg_file )
-    raw = mne.io.read_raw_edf(psg_file, preload=True, stim_channel=None, verbose=False) # type: ignore
-
-    data_x = raw.get_data()
-    channel_name = raw.ch_names
-
-
-
-    scoring_edf = root / f"SN{number_persion:03d}_sleepscoring.edf" # type: ignore
-
-    # خواندن annotation ها
+    scoring_edf = root / f"SN{number_persion:03d}_sleepscoring.edf"
     ann = mne.read_annotations(scoring_edf)
 
-    # تبدیل به DataFrame
     df = pd.DataFrame({
-    "start_sec": ann.onset,
-    "duration_sec": ann.duration,
-    "label": ann.description
+        "start_sec": ann.onset,
+        "duration_sec": ann.duration,
+        "label": ann.description
     })
 
+    df = df[df["label"].isin(stage_map)].copy()
+    df["label"] = df["label"].map(stage_map)
 
+    starts = df["start_sec"].to_numpy(dtype=np.int64)
+    labels = df["label"].to_numpy(dtype=np.int32)
 
-    valid_labels = set(stage_map.keys())
-    df_clean = df[df["label"].isin(valid_labels)].reset_index(drop=True)
+    # فقط پنجره‌هایی که کامل داخل سیگنال هستند
+    mask = (starts + win) <= T_total
+    starts = starts[mask]
+    labels = labels[mask]
+    n = len(starts)
+    if n == 0:
+        return None  # یا هر هندلینگ مناسب
 
-    df_clean["label"] = df_clean["label"].map(stage_map)
+    # پیش‌اختصاص و پر کردن سریع
+    X = np.empty((n, C, win), dtype=np.float32)
+    for j, s in enumerate(starts):
+        X[j] = data_x[:, s:s+win]
 
-    data_y = df_clean.astype(int).to_numpy()
+    y = labels
+    start_idx  = starts.astype(np.int32)
+    subject_id = np.full(n, number_persion, dtype=np.int32)
 
-    # save dataset 
-
-    idxs, Xs, ys,n_p = [], [], [],[]
-    list_start = list(df_clean['start_sec'])
-    list_label = list(df_clean['label'])
-    for i in range(len(list(df_clean['start_sec']))):
-        start = list_start[i]
-        label = list_label[i]
-        end = start + win
-
-        Xs.append(data_x[:, int(start):int(end)])               # type: ignore # یک پنجره به طول win
-        # مثالِ ساده برای لیبل: میانگین/مود برچسب‌ها داخل پنجره
-        y = label
-        ys.append(y)
-        idxs.append(start)                         # شروع پنجره (برای متادیتا)
-        n_p.append(number_persion)
-        X = np.stack(Xs, 0)                            # شکل: [N, C, win]
-        y = np.array(ys) 
     if print_data_analez:
-        print('-' * 50)
-        print('x analize : ')
-        print('shape x: ',data_x.shape) # type: ignore
-        print('channel signal :',channel_name)
-        print('-' * 50)
+        print('-'*50)
+        print('x shape:', data_x.shape, 'X windows:', X.shape)
+        print('label counts:', df["label"].value_counts().to_dict())
 
-        
-        print('y analize :')
-        print('number vlaue :' ,df["label"].value_counts())
-        print('number vlaue (clean label) :' ,df_clean["label"].value_counts())
-        print('shape label:', data_y.shape)
-        print('-' * 50)
-
-     
-    return data_x, data_y, X, y, np.array(idxs, dtype=np.int32),np.array(n_p, dtype=np.int32) # type: ignore
-
-
+    return X, y, start_idx, subject_id
 fs = 256
 
 import numpy as np
 import mne
 
+from pathlib import Path
+import os, numpy as np, mne, pandas as pd
+
+root = Path("/home/asr/mohammadBalaghi/dataset_signal/newdatahaag")
+dst_dir = Path('/home/asr/mohammadBalaghi/dataset_signal/newdatahaag1')
+dst_dir.mkdir(parents=True, exist_ok=True)
+
 persion = 154
-X_data, Y_data = [] , []
-# X: [N, C, T]   y: [N]   meta: هرچه لازم داری (مثلاً subject_id, start_idx)
-for i in range(persion):
-    print('-'*50)
-    number_persion = i +1
-    print(number_persion)
-    try :
-        _,_, X, y, start_idx,subject_id = read_data_haaglanden(
-            root = root, # type: ignore
-            number_persion = number_persion,
-            print_data_analez  = False,
-            stage_map = {
-                            "Sleep stage W": 0, "W": 0,
-                            "Sleep stage N1": 1, "Sleep stage 1": 1, "N1": 1,
-                            "Sleep stage N2": 2, "Sleep stage 2": 2, "N2": 2,
-                            "Sleep stage N3": 3, "Sleep stage 3": 3, "Sleep stage 4": 3, "N3": 3,
-                            "Sleep stage R": 4, "R": 4, "REM": 4,
-                            },
-            win = 32 * fs
-            )
-        np.savez_compressed(
-            f"/home/asr/mohammadBalaghi/dataset_signal/newdatahaag/s{number_persion}.npz",
-                X=X.astype("float32"),         # کم‌حجم‌تر از float64
-                y=y.astype("int16"),
-                subject_id=subject_id.astype("int16"),
-                start_idx=start_idx.astype("int32")
-            )
-        X_data.append(X)
-        Y_data.append(y)
+n_file  = 26
+fs = 256
 
-        
-        if number_persion % n_file == 0  or  number_persion == persion : 
-            
-            save_shard(dst_dir, number_persion, X_data, Y_data)
-            X_data, Y_data = [],[]
-            
-        
-    except:
-        print(f'number {number_persion} is not define.')
+X_buf, y_buf = [], []
+shard_id = 0
 
+for number_persion in range(1, persion+1):
+    print('-'*50, number_persion)
+    try:
+        out = read_data_haaglanden(
+            root=root,
+            number_persion=number_persion,
+            print_data_analez=False,
+            win=32*fs
+        )
+        if out is None:
+            print(f"no windows for {number_persion}")
+            continue
+
+        X, y, start_idx, subject_id = out
+
+        # (اختیاری) اگر حتماً می‌خواهی npz per-subject نگه داری، بدون فشرده‌سازی:
+        # np.savez(dst_dir / f"s{number_persion}.npz", X=X, y=y,
+        #          subject_id=subject_id, start_idx=start_idx)
+
+        X_buf.append(X)
+        y_buf.append(y)
+
+        if number_persion % n_file == 0 or number_persion == persion:
+            save_shard(dst_dir, shard_id, X_buf, y_buf)
+            shard_id += 1
+            X_buf, y_buf = [], []
+
+    except Exception as e:
+        print(f"number {number_persion} skipped: {e}")
