@@ -138,7 +138,7 @@ def dict_to_KT(feat_dict: dict, T: int):
         A = ensure_KT(a, T)          # شامل پد/برش امن
         mats.append(A.astype(np.float32, copy=False))
     return np.vstack(mats), keys_sorted
-from preproses_signals.ECG import feature_ecg
+from preproses_signals.ECG_1 import feature_ecg
 def feat_ecg(ecg, T=32*256):
     feat_dict = feature_ecg(ecg)     # تابعِ خودت از ماژول ECG
     x_feat, _ = dict_to_KT(feat_dict, T)
