@@ -108,7 +108,7 @@ def precompute_features_with_fn(src_train
         N, _, T = X.shape
         list_x_featr = []
         list_y_featr = []
-        for i in tqdm(range(N)):
+        '''for i in tqdm(range(N)):
             try:
                 sig = X[i, 0, :]          # view با شکل (T,)
                 sig = np.array(sig, copy=True)  # اگر writeable/contiguous می‌خواهی
@@ -120,10 +120,16 @@ def precompute_features_with_fn(src_train
             except:
                 data_can_perproses.append([x_path,i ])
                 data0 += 1
-                print(f'data0{data0}')
-        #arr = np.array(list_x_featr, dtype=np.float32)
-        #np.save(f"{dst_train}/", arr)       
-
+                print(f'data0{data0}')'''
+        x_name = Path(x_path).name
+        y_name = Path(y_path).name
+        arr = np.array(list_x_featr, dtype=np.float32)
+        print(f"{dst_train}/{x_name}")
+        print(f"{dst_train}/{y_name}")
+        #np.save(f"{dst_train}/{x_name}", arr)    
+        arr = np.array(list_y_featr, dtype=np.int16)
+        #np.save(f"{dst_train}/{y_name}", arr)    
+from pathlib import Path
 
 precompute_features_with_fn(src_train, dst_train, SELECTED_CH, feat_ecg)
 precompute_features_with_fn(src_val,   dst_val,   SELECTED_CH, feat_ecg)
