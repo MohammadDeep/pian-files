@@ -37,7 +37,7 @@ def _discover_K_T_first(xs, sel, ecg_fn):
             A = ensure_KT(ecg_fn(ecg0), T)   # (Kc, T)
         except:
             print('data0')
-            A = ensure_KT(np.zeros((53,256 *32), dtype=np.float32), T)   # (Kc, T)
+            A = ensure_KT(np.zeros((49,256 *32), dtype=np.float32), T)   # (Kc, T)
         k_per_ch.append(int(A.shape[0]))
     K = int(sum(k_per_ch))
     # offsetهای نوشتن برای هر کانال (برای پر کردن بافر بدون vstack)
@@ -69,7 +69,7 @@ def _process_one_shard(args):
                 A = ensure_KT(ecg_fn(ecg), T)        # (Kc, T)
             except:
                 print('data0')
-                A = ensure_KT(np.zeros((53,256 *32), dtype=np.float32),T)
+                A = ensure_KT(np.zeros((49,256 *32), dtype=np.float32),T)
             s, e = starts[j], ends[j]
             tmp[s:e, :] = A                      # کپی مستقیم به بافر
         Xout[i, :, :] = tmp
