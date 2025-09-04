@@ -89,10 +89,11 @@ def precompute_features_with_fn(src_train
                                 , feat_ecg
                                 ,data0 = 0):
 
-
+    data_can_perproses = []
     xs = sorted(glob.glob(os.path.join(src_train, "X_*.npy")))
     ys = sorted(glob.glob(os.path.join(src_train, "y_*.npy")))
-
+    print(xs, ys)
+    xxx = input('enter')
     # فقط فایل‌ها (نه پوشه‌ها)
     xs = [p for p in xs if os.path.isfile(p)]
     ys = [p for p in ys if os.path.isfile(p)]
@@ -105,6 +106,8 @@ def precompute_features_with_fn(src_train
         X_ch = X[:,SELECTED_CH,:]
         print(f"[READ] {os.path.basename(x_path)} shape={X_ch.shape} dtype={X_ch.dtype}")
         N, _, T = X.shape
+        list_x_featr = []
+        list_y_featr = []
         for i in tqdm(range(N)):
             try:
                 sig = X[i, 0, :]          # view با شکل (T,)
@@ -112,10 +115,14 @@ def precompute_features_with_fn(src_train
                 label = y[i]
                 feat_ecg_x = feat_ecg(sig)
                 print(f'shape feater :{feat_ecg_x.shape}')
-                break
+                list_x_featr.append(feat_ecg_x)
+                list_y_featr.append(label)
             except:
+                data_can_perproses.append([x_path,i ])
                 data0 += 1
                 print(f'data0{data0}')
+        #arr = np.array(list_x_featr, dtype=np.float32)
+        #np.save(f"{dst_train}/", arr)       
 
 
 precompute_features_with_fn(src_train, dst_train, SELECTED_CH, feat_ecg)
