@@ -94,7 +94,7 @@ def precompute_features_with_fn(src_train
     xs = sorted(glob.glob(os.path.join(src_train, "X_*.npy")))
     ys = sorted(glob.glob(os.path.join(src_train, "y_*.npy")))
     print(xs, ys)
-    xxx = input('enter')
+    
     # فقط فایل‌ها (نه پوشه‌ها)
     xs = [p for p in xs if os.path.isfile(p)]
     ys = [p for p in ys if os.path.isfile(p)]
