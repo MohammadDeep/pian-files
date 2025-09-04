@@ -180,7 +180,7 @@ def sheb_window(signal , point , window):
 
 def stpq_function(number_RR, r_peaks, denoised_ecg, ave_denoised_ecg,plot_show = True, number_ofset = .10, range_window_t = .20,range_start_t = .3, size_sheb_window = .2,number_to_ave_sheb = .05 ):
 
-
+  try:
     y2 = ave_denoised_ecg[r_peaks[number_RR]: r_peaks[number_RR + 1] ]
     y3 = denoised_ecg[r_peaks[number_RR]: r_peaks[number_RR + 1] ]
     x_range = range(r_peaks[number_RR], r_peaks[number_RR + 1] )
@@ -235,8 +235,6 @@ def stpq_function(number_RR, r_peaks, denoised_ecg, ave_denoised_ecg,plot_show =
     ii = 1
     while abs(p-t) < range_window_t * len(y3):
         index = -2 - ii
-        if index <0:
-           index = 0
         t = list(sorted_sheb_t_p.keys())[index]
         ii = + ii + 1
     if len(sorted_sheb_s) > 0:
@@ -280,6 +278,9 @@ def stpq_function(number_RR, r_peaks, denoised_ecg, ave_denoised_ecg,plot_show =
     for i in range(len(data_list)):
         data_list[i] = data_list[i] + r_peaks[number_RR]
     return data_list
+  except:
+     print('have error in  function : stpq_function')
+     return [0,0,0,0]
 
 
 
