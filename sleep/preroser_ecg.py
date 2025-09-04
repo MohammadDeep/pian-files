@@ -57,7 +57,7 @@ def _process_one_shard(args):
     # یک بافر موقت که هر بار پر می‌کنیم؛ از تخصیص‌های مکرر جلوگیری می‌کند
     tmp = np.empty((K, T), dtype=np.float32)
 
-    for i in range(N):
+    for i in tqdm(range(N)):
         # پر کردن tmp با استفاده از offsetهای از پیش محاسبه‌شده
         for j, c in enumerate(sel):
             ecg = _writable_1d(X[i, c, :])
