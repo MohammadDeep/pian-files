@@ -96,7 +96,9 @@ def _process_one_shard(args):
                         A = np.pad(A, ((0,padK),(0,0)), mode='edge')
                 tmp[s:e, :] = A
             except Exception:
+                
                 bad.append((i, int(c)))
+                print(f'can create feater {len(bad)}')
                 tmp[s:e, :] = 0.0
         Xout[i, :, :] = tmp
 
