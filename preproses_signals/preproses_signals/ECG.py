@@ -54,7 +54,7 @@ from scipy.signal import find_peaks
 
 
 def ave_signal(signal,Percentage = 0.6 , nim_Distance = 100,  window = 100 , step = 1,number_max_signal = 1, number_add = None, sampel_rate = 256,
-               show_plot = False, size_plot = (12, 3)):
+               show_plot = False, size_plot = (12, 3),number_try = 3, n_i = 0):
     '''
     توضیحات پارامترها
         signal:
@@ -142,11 +142,15 @@ def ave_signal(signal,Percentage = 0.6 , nim_Distance = 100,  window = 100 , ste
                     r_peaks.append(i)
                 elif nim_Distance < ( i - r_peaks[-1]):
                     r_peaks.append(i)
-
+    
     if (len(signal)/sampel_rate)/1.2 > len(r_peaks) :
-
+            n_i += 1
+            if n_i ==number_try:
+               print('can fine R in ecg in function ave_ecg') 
+               raise ValueError('in file ECG.py in function ave_ecg')
             number_max_signal  = number_max_signal  * 10
-            averaged_signal, max_signal, r_peaks = ave_signal(signal,Percentage , nim_Distance ,  window  , step ,number_max_signal = number_max_signal, number_add = number_add, sampel_rate = sampel_rate)
+            averaged_signal, max_signal, r_peaks = ave_signal(signal,Percentage , nim_Distance ,  window  , step ,number_max_signal = number_max_signal, number_add = number_add, sampel_rate = sampel_rate,n_i = n_i)
+
     r_peaks = np.array(r_peaks)
     if show_plot:
         time = np.linspace(0, len(signal) / sampel_rate, len(signal))
