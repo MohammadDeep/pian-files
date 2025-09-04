@@ -33,7 +33,10 @@ def _discover_K_T_first(xs, sel, ecg_fn):
     k_per_ch = []
     for c in sel:
         ecg0 = _writable_1d(X0[0, c, :])
-        A = ensure_KT(ecg_fn(ecg0), T)   # (Kc, T)
+        try:
+            A = ensure_KT(ecg_fn(ecg0), T)   # (Kc, T)
+        except:
+            A = ensure_KT(np.zeros((53,256 *32), dtype=np.float32), T)   # (Kc, T)
         k_per_ch.append(int(A.shape[0]))
     K = int(sum(k_per_ch))
     # offsetهای نوشتن برای هر کانال (برای پر کردن بافر بدون vstack)
@@ -61,7 +64,10 @@ def _process_one_shard(args):
         # پر کردن tmp با استفاده از offsetهای از پیش محاسبه‌شده
         for j, c in enumerate(sel):
             ecg = _writable_1d(X[i, c, :])
-            A = ensure_KT(ecg_fn(ecg), T)        # (Kc, T)
+            try:
+                A = ensure_KT(ecg_fn(ecg), T)        # (Kc, T)
+            except:
+                A = ensure_KT(np.zeros((53,256 *32), dtype=np.float32),T)
             s, e = starts[j], ends[j]
             tmp[s:e, :] = A                      # کپی مستقیم به بافر
         Xout[i, :, :] = tmp
