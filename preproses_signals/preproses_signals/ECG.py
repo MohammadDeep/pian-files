@@ -145,7 +145,7 @@ def ave_signal(signal,Percentage = 0.6 , nim_Distance = 100,  window = 100 , ste
     
     if (len(signal)/sampel_rate)/1.2 > len(r_peaks) :
             n_i += 1
-            print(f'try to fin r in ecg try : {n_i}')
+            #print(f'try to fin r in ecg try : {n_i}')
             if n_i ==number_try:
                print('can fine R in ecg in function ave_ecg') 
                raise ValueError('in file ECG.py in function ave_ecg')
