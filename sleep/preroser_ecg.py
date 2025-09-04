@@ -1,17 +1,25 @@
 import os, glob
 import numpy as np
 
+import os, glob
+import numpy as np
+from numpy.lib.format import open_memmap   # برای ساخت .npy ممری‌مپ‌شده
+
 def ensure_KT(a, T):
     a = np.asarray(a)
     if a.ndim == 1:
-        a = a[None, :]               # [1, T?]
-    if a.shape[-1] == T and a.ndim == 2:
-        # [K, T]
+        a = a[None, :]
+    if a.ndim == 2 and a.shape[-1] == T:
         return a.astype(np.float32, copy=False)
-    if a.shape[0] == T and a.ndim == 2:
-        # [T, K] -> [K, T]
+    if a.ndim == 2 and a.shape[0] == T:
         return a.T.astype(np.float32, copy=False)
     raise ValueError(f"Unexpected shape from feature fn: {a.shape}, expected (K,T) or (T,K) with T={T}")
+
+# ←←← NEW: ورودی را قطعاً writeable و contiguous می‌کند
+def _writable_1d(x):
+    # copy=True باعث می‌شود از ممری‌مپ جدا و writeable شود
+    a = np.array(x, dtype=np.float32, copy=True)
+    return np.ascontiguousarray(a)
 
 def precompute_features_with_fn(src_dir, dst_dir, channel_idx, ecg_fn, x_pat="X_*.npy", y_pat="y_*.npy"):
     os.makedirs(dst_dir, exist_ok=True)
@@ -19,36 +27,40 @@ def precompute_features_with_fn(src_dir, dst_dir, channel_idx, ecg_fn, x_pat="X_
     ys = sorted(glob.glob(os.path.join(src_dir, y_pat)))
     assert len(xs) == len(ys) and len(xs) > 0
 
-    # کشف K و T از اولین نمونه
-    X0 = np.load(xs[0], mmap_mode='r')   # (N, C, T)
-    N0, C0, T = X0.shape
+    # کشف K و T
+    X0 = np.load(xs[0], mmap_mode='r')   # (N, C, T) → read-only
+    _, _, T = X0.shape
     sel = np.asarray(channel_idx, dtype=np.int64)
+
     test_feat = []
     for c in sel:
-        test_feat.append(ensure_KT(ecg_fn(X0[0, c, :]), T))
-    K = sum(arr.shape[0] for arr in test_feat)   # مجموع کانال‌های فیچر برای هر نمونه
+        ecg0 = _writable_1d(X0[0, c, :])                 # ← writeable
+        test_feat.append(ensure_KT(ecg_fn(ecg0), T))
+    K = sum(arr.shape[0] for arr in test_feat)
     print(f"[precompute] Feature channels per sample = {K}, T = {T}")
 
     for x_path, y_path in zip(xs, ys):
-        X = np.load(x_path, mmap_mode='r')      # (N, C, T)
-        y = np.load(y_path, mmap_mode='r')      # (N,)
+        X = np.load(x_path, mmap_mode='r')              # read-only
+        y = np.load(y_path, mmap_mode='r')
         N = X.shape[0]
 
         out_path = os.path.join(dst_dir, os.path.basename(x_path).replace("X_", "Xfeat_"))
-        Y_out    = os.path.join(dst_dir, os.path.basename(y_path))  # لیبل‌ها همانند قبل
+        Y_out    = os.path.join(dst_dir, os.path.basename(y_path))
 
-        # فایل خروجی را از پیش اختصاص بده (ممکن است چند گیگ باشد؛ یک‌بار برای همیشه)
-        Xout = np.memmap(out_path, mode='w+', dtype=np.float32, shape=(N, K, T))
+        # ←←← NEW: فایل .npy ممری‌مپ‌شده‌ی واقعی
+        Xout = open_memmap(out_path, mode='w+', dtype=np.float32, shape=(N, K, T))
 
         write_idx = 0
         for i in range(N):
             parts = []
             for c in sel:
-                parts.append(ensure_KT(ecg_fn(X[i, c, :]), T))
-            Xi = np.vstack(parts)                # [K, T]
+                ecg = _writable_1d(X[i, c, :])          # ← هر بار writeable
+                parts.append(ensure_KT(ecg_fn(ecg), T)) # (Kc, T)
+            Xi = np.vstack(parts)                       # (K, T)
             Xout[write_idx, :, :] = Xi
             write_idx += 1
 
+        Xout.flush()                                     # اطمینان از نوشتن
         del Xout
         np.save(Y_out, np.asarray(y, dtype=np.int32))
         print(f"[precompute] Wrote {out_path} & {Y_out}")
