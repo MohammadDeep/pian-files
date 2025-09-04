@@ -738,8 +738,8 @@ def feature_ecg(
 
   HRV_LF_HF,HRV_HF, HRV_LF = windowed_lf_hf_ratio(RR_list, window_size = 20, fs=1.0)
   features['HRV_LF_HF'] = HRV_LF_HF
-  features['HRV_HF'] = HRV_HF
-  features['HRV_LF'] = HRV_LF
+  #features['HRV_HF'] = HRV_HF
+  #features['HRV_LF'] = HRV_LF
 
 
   ## S Q R T
