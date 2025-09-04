@@ -5,7 +5,7 @@ def signal_window(signal, window_size, step = 1, save_len = True):
 
     values = []
     if save_len  and step != 1 :
-      print('save len is avalabel   -> step = 1')
+      #print('save len is avalabel   -> step = 1')
       step = 1
     # حرکت پنجره بر روی سیگنال
     for i in range((len_signall - window_size)//step + 1):
@@ -37,7 +37,7 @@ def range_window(signal, window_size):
     a = len(signal[1])
     windows = signal
   except:
-    print('create_window')
+    #print('create_window')
     windows = signal_window(signal, window_size)
   values = []
   for window in windows:
@@ -53,7 +53,7 @@ def ave_window(signal, window_size):
     a = len(signal[1])
     windows = signal
   except:
-    print('create_window')
+    #print('create_window')
     windows = signal_window(signal, window_size)
   values = []
   for window in windows:
@@ -67,7 +67,7 @@ def max_window(signal, window_size):
     a = len(signal[1])
     windows = signal
   except:
-    print('create_window')
+    #print('create_window')
     windows = signal_window(signal, window_size)
   values = []
   for window in windows:
@@ -80,7 +80,7 @@ def min_window(signal, window_size):
     a = len(signal[1])
     windows = signal
   except:
-    print('create_window')
+    #print('create_window')
     windows = signal_window(signal, window_size)
   values = []
   for window in windows:
@@ -97,7 +97,7 @@ def variance_window(signal, window_size):
     a = len(signal[1])
     windows = signal
   except:
-    print('create_window')
+    #print('create_window')
     windows = signal_window(signal, window_size)
   values = []
   for window in windows:
@@ -110,6 +110,6 @@ def variance_window(signal, window_size):
 def dic_variance_window(dic_data, window_size):
   dic_variance = {}
   for label, signall in dic_data.items():
-    #print('signal',signall)
+    ##print('signal',signall)
     dic_variance['var_' + label] = variance_window(signall, window_size)
   return dic_variance
