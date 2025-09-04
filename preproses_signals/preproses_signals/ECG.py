@@ -666,7 +666,7 @@ def feature_ecg(
     ecg,
     #df,
     window_size = 1000,
-    show = True,
+    show = False,
     fix_len = True
     ):
   len_data = len(ecg)
