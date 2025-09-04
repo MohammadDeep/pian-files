@@ -92,7 +92,8 @@ def dict_to_KT(feat_dict: dict, T: int):
     mats = []
     for k in keys_sorted:
         a = feat_dict[k]
-        a.append(a[-1])
+        if len(a)+1 == T:
+            a.append(a[-1])
         a_KT = ensure_KT(a, T)               # (Kc, T) می‌سازد یا خطا می‌دهد
         if a_KT.shape[1] != T:
             raise ValueError(f"{k}: expected time length T={T}, got {a_KT.shape[1]}")
