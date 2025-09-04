@@ -233,7 +233,14 @@ def stpq_function(number_RR, r_peaks, denoised_ecg, ave_denoised_ecg,plot_show =
     t = list(sorted_sheb_t_p.keys())[-2]
    # #print(t, p)
     ii = 1
+    import time
+
+    timeout_sec = 2  * 60
+    t0 = time.perf_counter()
     while abs(p-t) < range_window_t * len(y3):
+        
+        if time.perf_counter() - t0 > timeout_sec:
+            raise TimeoutError(f"while took more than {timeout_sec} s")
         index = -2 - ii
         t = list(sorted_sheb_t_p.keys())[index]
         ii = + ii + 1
