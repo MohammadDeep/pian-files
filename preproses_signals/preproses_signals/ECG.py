@@ -203,12 +203,12 @@ def stpq_function(number_RR, r_peaks, denoised_ecg, ave_denoised_ecg,plot_show =
             sheb.append(i)
             x_sheb.append(i + r_peaks[number_RR])
             g1 = g0
-    #print(sheb[0:-1])
+    ##print(sheb[0:-1])
 
     t,p = 0,0
-    #print(t, p)
+    ##print(t, p)
     s,q = sheb[0], sheb[-1]
-    #print(s,q)
+    ##print(s,q)
 
     sorted_sheb_t_p = {}
     sorted_sheb_s = {}
@@ -231,7 +231,7 @@ def stpq_function(number_RR, r_peaks, denoised_ecg, ave_denoised_ecg,plot_show =
     sorted_sheb_q = dict(sorted(sorted_sheb_q.items(), key=lambda item: item[1][4]))
     p = list(sorted_sheb_t_p.keys())[-1]
     t = list(sorted_sheb_t_p.keys())[-2]
-   # print(t, p)
+   # #print(t, p)
     ii = 1
     while abs(p-t) < range_window_t * len(y3):
         index = -2 - ii
@@ -241,9 +241,9 @@ def stpq_function(number_RR, r_peaks, denoised_ecg, ave_denoised_ecg,plot_show =
         s = list(sorted_sheb_s.keys())[0]
     if len(sorted_sheb_q) > 0:
         q = list(sorted_sheb_q.keys())[0]
-    '''print(sorted_sheb_t_p)
-    print(sorted_sheb_s)
-    print(sorted_sheb_q)'''
+    '''#print(sorted_sheb_t_p)
+    #print(sorted_sheb_s)
+    #print(sorted_sheb_q)'''
 
 
 
@@ -255,8 +255,8 @@ def stpq_function(number_RR, r_peaks, denoised_ecg, ave_denoised_ecg,plot_show =
 
 
     if plot_show :
-        print(sheb[0:-1])
-        print(p,t)
+        #print(sheb[0:-1])
+        #print(p,t)
         plt.figure(figsize=(10, 6))
 
         plt.plot(x_range, y2, label='ave_long')
@@ -395,7 +395,7 @@ def windowed_sdnn(rr_intervals, window_size):
       a = len(rr_intervals[1])
       windows = rr_intervals
     except:
-      print('create_window')
+      #print('create_window')
       windows = signal_window(rr_intervals, window_size)
     for window in windows:
       # محاسبه انحراف معیار (SDNN) برای پنجره
@@ -431,7 +431,7 @@ def windowed_rmssd(rr_intervals, window_size):
       a = len(rr_intervals[1])
       windows = rr_intervals
     except:
-      print('create_window')
+      #print('create_window')
 
       windows = signal_window(rr_intervals, window_size)
     for window in windows:
@@ -471,7 +471,7 @@ def windowed_pnn50(rr_intervals, window_size, threshold=50):
       a = len(rr_intervals[1])
       windows = rr_intervals
     except:
-      print('create_window')
+      #print('create_window')
 
       windows = signal_window(rr_intervals, window_size)
     for window in windows:
@@ -521,7 +521,7 @@ def windowed_lf_hf_ratio(rr_intervals, window_size, fs=1.0):
       a = len(rr_intervals[1])
       windows = rr_intervals
     except:
-      print('create_window')
+      #print('create_window')
 
       windows = signal_window(rr_intervals, window_size)
     for window in windows:
@@ -750,12 +750,12 @@ def feature_ecg(
   features.update(dic_var_number_df)
 
   if fix_len:
-    #print('in fix len functiones')
+    ##print('in fix len functiones')
     # Create a new dictionary to store the fixed-length features
     fixed_features = {}
     for key, value in features.items():
       if len(value) != len_data:
-        #print(key, len(value), len_data)
+        ##print(key, len(value), len_data)
         fixed_features[key + '_fix_len'] = fix_len_for_hrv(Seconds_RR, value, len_data)
       else:
         fixed_features[key] = value

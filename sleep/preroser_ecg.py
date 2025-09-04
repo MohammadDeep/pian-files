@@ -4,7 +4,7 @@ import numpy as np
 import os, glob
 import numpy as np
 from numpy.lib.format import open_memmap   # برای ساخت .npy ممری‌مپ‌شده
-
+from tqdm import tqdm  
 def ensure_KT(a, T):
     a = np.asarray(a)
     if a.ndim == 1:
@@ -39,7 +39,7 @@ def precompute_features_with_fn(src_dir, dst_dir, channel_idx, ecg_fn, x_pat="X_
     K = sum(arr.shape[0] for arr in test_feat)
     print(f"[precompute] Feature channels per sample = {K}, T = {T}")
 
-    for x_path, y_path in zip(xs, ys):
+    for x_path, y_path in tqdm(zip(xs, ys)):
         X = np.load(x_path, mmap_mode='r')              # read-only
         y = np.load(y_path, mmap_mode='r')
         N = X.shape[0]
@@ -51,7 +51,7 @@ def precompute_features_with_fn(src_dir, dst_dir, channel_idx, ecg_fn, x_pat="X_
         Xout = open_memmap(out_path, mode='w+', dtype=np.float32, shape=(N, K, T))
 
         write_idx = 0
-        for i in range(N):
+        for i in tqdm(range(N)):
             parts = []
             for c in sel:
                 ecg = _writable_1d(X[i, c, :])          # ← هر بار writeable
