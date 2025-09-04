@@ -235,6 +235,8 @@ def stpq_function(number_RR, r_peaks, denoised_ecg, ave_denoised_ecg,plot_show =
     ii = 1
     while abs(p-t) < range_window_t * len(y3):
         index = -2 - ii
+        if index <0:
+           index = 0
         t = list(sorted_sheb_t_p.keys())[index]
         ii = + ii + 1
     if len(sorted_sheb_s) > 0:
