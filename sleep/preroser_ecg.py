@@ -99,8 +99,8 @@ def precompute_features_with_fn(src_train
     for x_path, y_path in zip(xs, ys):
         X = np.load(x_path, mmap_mode='r')   # OK: فایل npy
         y = np.load(y_path, mmap_mode='r')
-        
-
+        print(f"[READ] {os.path.basename(x_path)} shape={X.shape} dtype={X.dtype}")
+        print(f"[READ] {os.path.basename(y_path)} shape={y.shape} dtype={y.dtype}")
 
 precompute_features_with_fn(src_train, dst_train, SELECTED_CH, feat_ecg)
 precompute_features_with_fn(src_val,   dst_val,   SELECTED_CH, feat_ecg)
