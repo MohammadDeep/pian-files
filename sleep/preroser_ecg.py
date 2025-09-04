@@ -11,6 +11,30 @@ from numpy.lib.format import open_memmap
 from concurrent.futures import ProcessPoolExecutor
 from tqdm import tqdm
 
+import numpy as np
+import signal
+
+# --- تایم‌اوت سطح پردازش (Unix only) ---
+class FnTimeoutError(RuntimeError): pass
+
+def _raise_timeout(signum, frame):
+    raise FnTimeoutError("function timed out")
+
+def call_with_timeout(seconds, fn, *args, **kwargs):
+    """fn را با تایم‌اوت اجرا می‌کند؛ در صورت تاخیر بیش از حد، FnTimeoutError می‌اندازد."""
+    old_handler = signal.signal(signal.SIGALRM, _raise_timeout)
+    signal.setitimer(signal.ITIMER_REAL, float(seconds))  # دقت زیرثانیه
+    try:
+        return fn(*args, **kwargs)
+    finally:
+        # تایمر و هندلر را حتماً برگردان
+        signal.setitimer(signal.ITIMER_REAL, 0.0)
+        signal.signal(signal.SIGALRM, old_handler)
+
+time = 60 * 3
+
+
+
 # ---------- helpers ----------
 def ensure_KT(a, T):
     a = np.asarray(a)
@@ -34,6 +58,7 @@ def _discover_K_T_first(xs, sel, ecg_fn):
     for c in sel:
         ecg0 = _writable_1d(X0[0, c, :])
         try:
+            out = call_with_timeout(time, ecg_fn, ecg0)
             A = ensure_KT(ecg_fn(ecg0), T)   # (Kc, T)
         except:
             print('data0')
@@ -66,6 +91,7 @@ def _process_one_shard(args):
         for j, c in enumerate(sel):
             ecg = _writable_1d(X[i, c, :])
             try:
+                out = call_with_timeout(time, ecg_fn, ecg)
                 A = ensure_KT(ecg_fn(ecg), T)        # (Kc, T)
             except:
                 print('data0')
