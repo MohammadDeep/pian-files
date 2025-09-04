@@ -744,7 +744,7 @@ def feature_ecg(
 
   ## S Q R T
   dic_sqrt, list_s_t = S_Q_R_T(data, ecg_denoise)
-  features.update(dic_sqrt)
+  #features.update(dic_sqrt)
 
   dic_var_sqrt = mw.dic_variance_window(dic_sqrt, 10)
   features.update(dic_var_sqrt)
@@ -753,10 +753,10 @@ def feature_ecg(
   features.update(show_df_pec_sqrt)
   ## [s, t]
   dic_s_t = futer_s_t(list_s_t)
-  features.update(dic_s_t)
+  #features.update(dic_s_t)
 
   dic_number_df = number_df_signalles( ecg_denoise, data,  100)
-  features.update(dic_number_df)
+  #features.update(dic_number_df)
 
   dic_var_number_df = mw.dic_variance_window(dic_number_df, 10)
   features.update(dic_var_number_df)
