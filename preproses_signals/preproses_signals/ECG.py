@@ -747,7 +747,7 @@ def feature_ecg(
   #features.update(dic_sqrt)
 
   dic_var_sqrt = mw.dic_variance_window(dic_sqrt, 10)
-  features.update(dic_var_sqrt)
+  #features.update(dic_var_sqrt)
 
   show_df_pec_sqrt = function.dic_show_df_pec(dic_sqrt, 0.4)
   #features.update(show_df_pec_sqrt)
@@ -759,7 +759,7 @@ def feature_ecg(
   #features.update(dic_number_df)
 
   dic_var_number_df = mw.dic_variance_window(dic_number_df, 10)
-  features.update(dic_var_number_df)
+  #features.update(dic_var_number_df)
 
   if fix_len:
     ##print('in fix len functiones')
