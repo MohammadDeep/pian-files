@@ -83,6 +83,7 @@ def feat_ecg (ecg , T = 32 * 256):
     return x_feat
 
 import os, glob
+import json
 def precompute_features_with_fn(src_train
                                 , dst_train
                                 , SELECTED_CH
@@ -128,7 +129,9 @@ def precompute_features_with_fn(src_train
         print(f"{dst_train}/{y_name}")
         np.save(f"{dst_train}/{x_name}", arr)    
         arr = np.array(list_y_featr, dtype=np.int16)
-        np.save(f"{dst_train}/{y_name}", arr)    
+        np.save(f"{dst_train}/{y_name}", arr) 
+    with open(f"{dst_train}/data_deleted.json", "w", encoding="utf-8") as f:
+        json.dump(data_can_perproses, f, ensure_ascii=False, indent=2)   
 from pathlib import Path
 
 precompute_features_with_fn(src_train, dst_train, SELECTED_CH, feat_ecg)
