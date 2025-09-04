@@ -78,7 +78,7 @@ class BasicBlock(nn.Module):
         out = self.conv1(x)
         out = self.bn1(out)
         out = self.relu(out)
-
+        out = self.drop(out) 
         out = self.conv2(out)
         if self.hava_maxpool:
          out = self.maxpool(out)
