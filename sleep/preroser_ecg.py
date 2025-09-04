@@ -36,6 +36,7 @@ def _discover_K_T_first(xs, sel, ecg_fn):
         try:
             A = ensure_KT(ecg_fn(ecg0), T)   # (Kc, T)
         except:
+            print('data0')
             A = ensure_KT(np.zeros((53,256 *32), dtype=np.float32), T)   # (Kc, T)
         k_per_ch.append(int(A.shape[0]))
     K = int(sum(k_per_ch))
@@ -67,6 +68,7 @@ def _process_one_shard(args):
             try:
                 A = ensure_KT(ecg_fn(ecg), T)        # (Kc, T)
             except:
+                print('data0')
                 A = ensure_KT(np.zeros((53,256 *32), dtype=np.float32),T)
             s, e = starts[j], ends[j]
             tmp[s:e, :] = A                      # کپی مستقیم به بافر
