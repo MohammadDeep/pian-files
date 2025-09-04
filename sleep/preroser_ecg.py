@@ -86,7 +86,8 @@ import os, glob
 def precompute_features_with_fn(src_train
                                 , dst_train
                                 , SELECTED_CH
-                                , feat_ecg):
+                                , feat_ecg
+                                ,data0 = 0):
 
 
     xs = sorted(glob.glob(os.path.join(src_train, "X_*.npy")))
@@ -105,12 +106,16 @@ def precompute_features_with_fn(src_train
         print(f"[READ] {os.path.basename(x_path)} shape={X_ch.shape} dtype={X_ch.dtype}")
         N, _, T = X.shape
         for i in tqdm(range(N)):
-            sig = X[i, 0, :]          # view با شکل (T,)
-            sig = np.array(sig, copy=True)  # اگر writeable/contiguous می‌خواهی
-            label = y[i]
-            feat_ecg_x = feat_ecg(sig)
-            print(feat_ecg_x.shape)
-            break
+            try:
+                sig = X[i, 0, :]          # view با شکل (T,)
+                sig = np.array(sig, copy=True)  # اگر writeable/contiguous می‌خواهی
+                label = y[i]
+                feat_ecg_x = feat_ecg(sig)
+                print(f'shape feater :{feat_ecg_x.shape}')
+                break
+            except:
+                data0 += 1
+                print(f'data0{data0}')
 
 
 precompute_features_with_fn(src_train, dst_train, SELECTED_CH, feat_ecg)
