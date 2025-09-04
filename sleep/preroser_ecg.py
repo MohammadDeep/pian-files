@@ -88,7 +88,7 @@ def dict_to_KT(feat_dict: dict, T: int):
     return X, keys_sorted
 
 
-def feat_ecg (ecg , T):
+def feat_ecg (ecg , T = 32 * 256):
     feat_dict = feature_ecg(ecg)
     x_feat, keys_sorted = dict_to_KT(feat_dict, T)
 
