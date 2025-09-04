@@ -54,7 +54,7 @@ from scipy.signal import find_peaks
 
 
 def ave_signal(signal,Percentage = 0.6 , nim_Distance = 100,  window = 100 , step = 1,number_max_signal = 1, number_add = None, sampel_rate = 256,
-               show_plot = False, size_plot = (12, 3),number_try = 30, n_i = 0):
+               show_plot = False, size_plot = (12, 3),number_try = 10, n_i = 0):
     '''
     توضیحات پارامترها
         signal:
