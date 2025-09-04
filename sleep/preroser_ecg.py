@@ -101,6 +101,7 @@ def precompute_features_with_fn(src_train
         y = np.load(y_path, mmap_mode='r')
         print(f"[READ] {os.path.basename(x_path)} shape={X.shape} dtype={X.dtype}")
         print(f"[READ] {os.path.basename(y_path)} shape={y.shape} dtype={y.dtype}")
-
+        X_ch = X[:,SELECTED_CH,:]
+        print(f"[READ] {os.path.basename(x_path)} shape={X_ch.shape} dtype={X_ch.dtype}")
 precompute_features_with_fn(src_train, dst_train, SELECTED_CH, feat_ecg)
 precompute_features_with_fn(src_val,   dst_val,   SELECTED_CH, feat_ecg)
