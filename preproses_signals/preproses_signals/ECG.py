@@ -750,7 +750,7 @@ def feature_ecg(
   features.update(dic_var_sqrt)
 
   show_df_pec_sqrt = function.dic_show_df_pec(dic_sqrt, 0.4)
-  features.update(show_df_pec_sqrt)
+  #features.update(show_df_pec_sqrt)
   ## [s, t]
   dic_s_t = futer_s_t(list_s_t)
   #features.update(dic_s_t)
