@@ -103,5 +103,15 @@ def precompute_features_with_fn(src_train
         print(f"[READ] {os.path.basename(y_path)} shape={y.shape} dtype={y.dtype}")
         X_ch = X[:,SELECTED_CH,:]
         print(f"[READ] {os.path.basename(x_path)} shape={X_ch.shape} dtype={X_ch.dtype}")
+        N, _, T = X.shape
+        for i in tqdm(range(N)):
+            sig = X[i, 0, :]          # view با شکل (T,)
+            sig = np.array(sig, copy=True)  # اگر writeable/contiguous می‌خواهی
+            label = y[i]
+            feat_ecg_x = feat_ecg(sig)
+            print(feat_ecg_x.shape)
+            break
+
+
 precompute_features_with_fn(src_train, dst_train, SELECTED_CH, feat_ecg)
 precompute_features_with_fn(src_val,   dst_val,   SELECTED_CH, feat_ecg)
