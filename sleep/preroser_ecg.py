@@ -89,15 +89,17 @@ def precompute_features_with_fn(src_train
                                 , feat_ecg):
 
 
-    files = sorted(glob.glob(os.path.join(src_train, "X*")))          # یا "X_*.npy"
-    dirs  = sorted({os.path.dirname(f) for f in files})          # حذف تکراری‌ها
+    xs = sorted(glob.glob(os.path.join(src_train, "X_*.npy")))
+    ys = sorted(glob.glob(os.path.join(src_train, "y_*.npy")))
 
-    print(files) 
-    print(dirs)   
-    for dir in dirs:   
-        arr = np.load(dir)      # آرایه‌ی NumPy
-        print(arr.shape, arr.dtype) 
+    # فقط فایل‌ها (نه پوشه‌ها)
+    xs = [p for p in xs if os.path.isfile(p)]
+    ys = [p for p in ys if os.path.isfile(p)]
 
+    for x_path, y_path in zip(xs, ys):
+        X = np.load(x_path, mmap_mode='r')   # OK: فایل npy
+        y = np.load(y_path, mmap_mode='r')
+        
 
 
 precompute_features_with_fn(src_train, dst_train, SELECTED_CH, feat_ecg)
