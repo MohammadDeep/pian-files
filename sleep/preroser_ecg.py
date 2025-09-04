@@ -115,7 +115,7 @@ def precompute_features_with_fn(src_train
                 sig = np.array(sig, copy=True)  # اگر writeable/contiguous می‌خواهی
                 label = y[i]
                 feat_ecg_x = feat_ecg(sig)
-                print(f'shape feater :{feat_ecg_x.shape}')
+                #print(f'shape feater :{feat_ecg_x.shape}')
                 list_x_featr.append(feat_ecg_x)
                 list_y_featr.append(label)
             except:
