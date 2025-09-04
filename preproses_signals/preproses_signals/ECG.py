@@ -689,19 +689,19 @@ def feature_ecg(
   features['ecg_denoise'] = ecg_denoise
   # range
   ecg_range = mw.range_window(ecg_denoise, window_size)
-  features['ecg_range'] = ecg_range
+  #features['ecg_range'] = ecg_range
   # ave
   ecg_ave = mw.ave_window(ecg_denoise, window_size)
-  features['ecg_ave'] = ecg_ave
+  #features['ecg_ave'] = ecg_ave
   # variance
   ecg_variance = mw.variance_window(ecg_denoise, window_size)
   features['ecg_variance'] = ecg_variance
   # max
   ecg_max = mw.max_window(ecg_denoise, window_size)
-  features['ecg_max'] = ecg_max
+  #features['ecg_max'] = ecg_max
   # min
   ecg_min = mw.min_window(ecg_denoise, window_size)
-  features['ecg_min'] = ecg_min
+  #features['ecg_min'] = ecg_min
 
 
   # R_R
