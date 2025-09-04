@@ -39,7 +39,7 @@ class BasicBlock(nn.Module):
         dilation: int = 1,
         norm_layer: Optional[Callable[..., nn.Module]] = None,
         hava_maxpool:bool = True,
-        dropout_p=0.85
+        dropout_p=0.95
     ):
         super().__init__()
         if norm_layer is None:
