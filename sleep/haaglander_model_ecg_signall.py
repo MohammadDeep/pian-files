@@ -179,7 +179,7 @@ root_dir_val = "/home/asr/mohammadBalaghi/dataset_signal/newdatahaag1/val"
 # (اختیاری) یک بار محاسبه و ذخیره کن، بعداً همان را استفاده کن:
 stats = compute_channel_stats(root_dir, channel_idx= SELECTED_CH)
 print("stats:", stats)  # {'mean': [...], 'std': [...]}
-
+IN_CH = len(stats['mean'])
 train_ds= ShardedNPYDataset(root_dir, normalize=stats, channel_idx = SELECTED_CH)
 val_ds= ShardedNPYDataset(root_dir_val, normalize=stats, channel_idx = SELECTED_CH)
 
