@@ -25,7 +25,7 @@ signal_names = ['EEG F4-M1', 'EEG C4-M1', 'EEG O2-M1', 'EEG C3-M2', 'EMG chin', 
 
 # انتخاب کانال‌ها: مثلا فقط 4 سیگنال از 8 سیگنال
 SELECTED_CH = None   # ← این را مطابق دادهٔ خودت عوض کن
-IN_CH = 4   # مهم: مدل‌ها با این مقدار sync شوند
+
 '''
 ====================================================================
                             Create dataset
@@ -172,9 +172,9 @@ def compute_channel_stats(root_dir, x_pattern="X_*.npy", eps=1e-12, channel_idx=
 
 from torch.utils.data import random_split
 
-root_dir = "/home/asr/mohammadBalaghi/dataset_signal/newdatahaag1/train"
+root_dir = f"{folder}/train"
 
-root_dir_val = "/home/asr/mohammadBalaghi/dataset_signal/newdatahaag1/val"
+root_dir_val = f"{folder}/val"
 
 # (اختیاری) یک بار محاسبه و ذخیره کن، بعداً همان را استفاده کن:
 stats = compute_channel_stats(root_dir, channel_idx= SELECTED_CH)
