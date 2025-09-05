@@ -12,7 +12,7 @@ dir_history_model = '/home/asr/mohammadBalaghi/pian-files/__HISTORY_MODEL'
 N_CLASSES = 5
 
 
-NH_LISTM = 128 
+NH_LISTM = 64
 SEC = 32
 
 BATCH_SIZE = 128  *4
@@ -257,7 +257,7 @@ print('model1 : ')
 start lne  = 2 * 256
 step  = 2 * 256
 '''
-net1 = SimpleResNet(BasicBlock, layers=[1,1,1,2,2],list_step = [2,2,2,1,1], in_ch=IN_CH, base_planes=16)
+net1 = SimpleResNet(BasicBlock, layers=[1,1,1,2,2],list_step = [2,2,2,1,1], in_ch=IN_CH, base_planes=8)
 lstm1 = LSTM_Model(input_size = 256,
                     hidden_size = NH_LISTM,
                     num_layers = 2, 
@@ -298,7 +298,7 @@ print('model2 : ')
 start lne  = 1 * 256
 step  = 1 * 256
 '''
-net2 = SimpleResNet(BasicBlock, layers=[1,1,1,2,2],list_step = [2,2,1,1,1], in_ch=IN_CH, base_planes=16)
+net2 = SimpleResNet(BasicBlock, layers=[1,1,1,2,2],list_step = [2,2,1,1,1], in_ch=IN_CH, base_planes=8)
 lstm2 = LSTM_Model(input_size = 256,
                 hidden_size = NH_LISTM,
                     num_layers = 2, 
@@ -337,7 +337,7 @@ print('model3 : ')
 start lne  = .5 * 256
 step  = .5 * 256
 '''
-net3 = SimpleResNet(BasicBlock, layers=[1,1,1,2,2],list_step = [2,1,1,1,1], in_ch=IN_CH, base_planes=16)
+net3 = SimpleResNet(BasicBlock, layers=[1,1,1,2,2],list_step = [2,1,1,1,1], in_ch=IN_CH, base_planes=8)
 lstm3 = LSTM_Model(input_size = 256,
                 hidden_size = NH_LISTM,
                     num_layers = 2, 
