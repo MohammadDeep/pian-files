@@ -4,7 +4,8 @@
 ====================================================================                            
 '''
 # folder dataset .npy
-folder = "/home/asr/mohammadBalaghi/dataset_signal/newdatahaag"
+
+folder = "/home/asr/mohammadBalaghi/dataset_signal/newdatahaag1_feat"
 EPOCHES = 100
 
 dir_history_model = '/home/asr/mohammadBalaghi/pian-files/__HISTORY_MODEL'
