@@ -52,7 +52,7 @@ save_dir.mkdir(parents=True, exist_ok=True)
 
 class ShardedNPYDataset(Dataset):
     def __init__(self, root_dir,
-                 x_pattern="X_*.npy",
+                 x_pattern="X*.npy",
                  y_pattern="y_*.npy",
                  transform=None,
                  normalize=None,     # {"mean":[...], "std":[...]} به‌ترتیب کانال‌های انتخاب‌شده
@@ -133,7 +133,7 @@ class ShardedNPYDataset(Dataset):
 
         y_t = torch.tensor(int(y_np), dtype=self.dtype_y)
         return x, y_t
-def compute_channel_stats(root_dir, x_pattern="X_*.npy", eps=1e-12, channel_idx=None):
+def compute_channel_stats(root_dir, x_pattern="X*.npy", eps=1e-12, channel_idx=None):
     xs = sorted(glob.glob(os.path.join(root_dir, x_pattern)))
     assert len(xs) > 0
 
